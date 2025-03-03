@@ -1,9 +1,0 @@
--rootPath
-C:/Users/sriza/OneDrive/Documents/rms/git/sattech/simdez/simdez
--cmake-output
--output-file
-C:/Users/sriza/OneDrive/Documents/rms/git/sattech/simdez/simdez/build/Desktop_Qt_6_8_2_MinGW_64_bit-Debug/.qt/qml_imports/simdez_build.cmake
--importPath
-C:/Users/sriza/OneDrive/Documents/rms/git/sattech/simdez/simdez/build/Desktop_Qt_6_8_2_MinGW_64_bit-Debug
--importPath
-C:/Qt/6.8.2/mingw_64/qml

@@ -12,6 +12,7 @@ qt_add_executable(simdez
     mainwindow.h
     mainwindow.ui
     resources.qrc
+    satellite.h satellite.cpp
 )
 
 target_link_libraries(simdez
