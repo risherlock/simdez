@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/3d">
+        <file>main.qml</file>
+        <file>sat.glb</file>
+    </qresource>
+</RCC>
