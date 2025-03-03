@@ -21,40 +21,18 @@ Item {
             brightness: 1
         }
 
-        Model {
-            position: Qt.vector3d(0, -200, 0)
-            source: "#Cylinder"
-            scale: Qt.vector3d(2, 0.2, 1)
-            materials: [ DefaultMaterial {
-                    diffuseColor: "red"
-                }
-            ]
-        }
+        Sat
+        {
+          scale: Qt.vector3d(50, 50, 50)
+          rotation: Qt.quaternion(Math.cos(angle / 2), Math.sin(angle / 2) * axis.x, Math.sin(angle / 2) * axis.y, Math.sin(angle / 2) * axis.z)
 
-        Model {
-            position: Qt.vector3d(0, 150, 0)
-            source: "#Sphere"
-
-            materials: [ DefaultMaterial {
-                    diffuseColor: "blue"
-                }
-            ]
-
-            SequentialAnimation on y {
-                loops: Animation.Infinite
-                NumberAnimation {
-                    duration: 3000
-                    to: -150
-                    from: 150
-                    easing.type:Easing.InQuad
-                }
-                NumberAnimation {
-                    duration: 3000
-                    to: 150
-                    from: -150
-                    easing.type:Easing.OutQuad
-                }
-            }
+          NumberAnimation on eulerRotation.y
+          {
+            from: 0
+            to: 360
+            duration: 5000
+            loops: Animation.Infinite
+          }
         }
     }
 }
