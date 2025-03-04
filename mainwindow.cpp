@@ -2,6 +2,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include <QVBoxLayout>
 #include <QQuickView>
 #include <QWidget>
 #include <QUrl>
@@ -12,25 +13,26 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    // Register the satellite type with QML before loading the QML file
+    // Register the class for QML to access variables
     qmlRegisterType<satellite>("Satellite", 1, 0, "Satellite");
 
-    // QQuickView to load the QML file
+    // Load the QML file to QQuickView
     QQuickView *view = new QQuickView;
     view->setSource(QUrl::fromLocalFile("../../main.qml"));
 
-    // A container widget for the QQuickView
+    // A container widget to link QQuickView to QWidget
     QWidget *container = QWidget::createWindowContainer(view, this);
-    if (!container) {
-        qWarning("Failed to create QQuickView container!");
-        return;
-    }
+    QVBoxLayout *layout = new QVBoxLayout(ui->quickContainer);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(0);
+    ui->quickContainer->setLayout(layout);
+    ui->quickContainer->layout()->addWidget(container);
 
-    // Set the container as the central widget of the main window
-    setCentralWidget(container);
-    container->setMinimumSize(640, 480);
-    container->setFocusPolicy(Qt::StrongFocus);
-    resize(800, 600);
+    QPixmap img("../../assets/earth.png");
+    ui->label_map->setPixmap(img);
+    ui->label_map->setScaledContents(true);
+
+    resize(1280, 720);
 }
 
 MainWindow::~MainWindow()

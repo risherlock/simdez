@@ -5,8 +5,7 @@ import Satellite 1.0
 
 Item
 {
-    width: 800
-    height: 600
+    anchors.fill: parent
 
     Satellite
     {
@@ -24,7 +23,7 @@ Item
 
         PerspectiveCamera
         {
-            position: Qt.vector3d(0, 0, 600)
+            position: Qt.vector3d(0, 0, 400)
         }
 
         DirectionalLight
@@ -36,6 +35,7 @@ Item
         {
             Sat {}
             scale: Qt.vector3d(50, 50, 50)
+            position: Qt.vector3d(0, 0, 0)
             rotation: tamariw.get_q
         }
     }

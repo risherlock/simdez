@@ -3,7 +3,7 @@
 satellite::satellite(QObject *parent)
     : QObject(parent), q()
 {
-    QVector3D euler(0, 0, 0); // Initial orientation
+    QVector3D euler(45, 0, 0); // Initial orientation
     q = QQuaternion::fromEulerAngles(euler);
 }
 
