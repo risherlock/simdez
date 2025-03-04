@@ -8,7 +8,7 @@
 class satellite : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(QQuaternion q READ get_q WRITE set_q NOTIFY q_changed)
+    Q_PROPERTY(QQuaternion get_q READ get_q WRITE set_q NOTIFY q_changed)
 
 public:
     explicit satellite(QObject *parent = nullptr);
