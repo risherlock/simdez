@@ -5,5 +5,8 @@
     </qresource>
     <qresource prefix="/">
         <file>assets/earth.png</file>
+        <file>assets/check.png</file>
+        <file>assets/error.png</file>
+        <file>assets/warning.png</file>
     </qresource>
 </RCC>
