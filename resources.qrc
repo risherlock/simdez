@@ -1,8 +1,4 @@
 <RCC>
-    <qresource prefix="/3d">
-        <file>main.qml</file>
-        <file>sat.glb</file>
-    </qresource>
     <qresource prefix="/">
         <file>assets/earth.png</file>
         <file>assets/check.png</file>

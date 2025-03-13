@@ -95,7 +95,7 @@
         <set>Qt::AlignmentFlag::AlignCenter</set>
        </property>
       </widget>
-      <widget class="QWidget" name="">
+      <widget class="QWidget" name="layoutWidget">
        <property name="geometry">
         <rect>
          <x>30</x>
@@ -163,7 +163,7 @@
         <item>
          <layout class="QVBoxLayout" name="verticalLayout">
           <item>
-           <widget class="QLineEdit" name="lineEdit">
+           <widget class="QLineEdit" name="lineEdit_moi_xx">
             <property name="font">
              <font>
               <family>Courier New</family>
@@ -174,7 +174,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="lineEdit_2">
+           <widget class="QLineEdit" name="lineEdit_moi_yx">
             <property name="font">
              <font>
               <family>Courier New</family>
@@ -185,7 +185,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="lineEdit_3">
+           <widget class="QLineEdit" name="lineEdit_moi_zx">
             <property name="font">
              <font>
               <family>Courier New</family>
@@ -255,7 +255,7 @@
         <item>
          <layout class="QVBoxLayout" name="verticalLayout_2">
           <item>
-           <widget class="QLineEdit" name="lineEdit_4">
+           <widget class="QLineEdit" name="lineEdit_moi_xy">
             <property name="font">
              <font>
               <family>Courier New</family>
@@ -266,7 +266,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="lineEdit_5">
+           <widget class="QLineEdit" name="lineEdit_moi_yy">
             <property name="font">
              <font>
               <family>Courier New</family>
@@ -277,7 +277,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="lineEdit_6">
+           <widget class="QLineEdit" name="lineEdit_moi_zy">
             <property name="font">
              <font>
               <family>Courier New</family>
@@ -347,7 +347,7 @@
         <item>
          <layout class="QVBoxLayout" name="verticalLayout_3">
           <item>
-           <widget class="QLineEdit" name="lineEdit_7">
+           <widget class="QLineEdit" name="lineEdit_moi_xz">
             <property name="font">
              <font>
               <family>Courier New</family>
@@ -358,7 +358,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="lineEdit_8">
+           <widget class="QLineEdit" name="lineEdit_moi_yz">
             <property name="font">
              <font>
               <family>Courier New</family>
@@ -369,7 +369,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="lineEdit_9">
+           <widget class="QLineEdit" name="lineEdit_moi_zz">
             <property name="font">
              <font>
               <family>Courier New</family>
@@ -406,7 +406,7 @@
       <property name="alignment">
        <set>Qt::AlignmentFlag::AlignCenter</set>
       </property>
-      <widget class="QWidget" name="">
+      <widget class="QWidget" name="layoutWidget">
        <property name="geometry">
         <rect>
          <x>249</x>
@@ -417,7 +417,7 @@
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_7">
         <item>
-         <widget class="QLineEdit" name="lineEdit_10">
+         <widget class="QLineEdit" name="lineEdit_em_turns">
           <property name="font">
            <font>
             <family>Courier New</family>
@@ -428,7 +428,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="lineEdit_11">
+         <widget class="QLineEdit" name="lineEdit_em_max_current">
           <property name="font">
            <font>
             <family>Courier New</family>
@@ -439,7 +439,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="lineEdit_14">
+         <widget class="QLineEdit" name="lineEdit_em_core_length">
           <property name="font">
            <font>
             <family>Courier New</family>
@@ -450,7 +450,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="lineEdit_15">
+         <widget class="QLineEdit" name="lineEdit_em_core_area">
           <property name="font">
            <font>
             <family>Courier New</family>
@@ -462,7 +462,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="">
+      <widget class="QWidget" name="layoutWidget">
        <property name="geometry">
         <rect>
          <x>40</x>
@@ -565,7 +565,7 @@
       <property name="alignment">
        <set>Qt::AlignmentFlag::AlignCenter</set>
       </property>
-      <widget class="QTextEdit" name="textEdit">
+      <widget class="QTextEdit" name="textEdit_orb_tel_1">
        <property name="geometry">
         <rect>
          <x>70</x>
@@ -619,7 +619,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
        </property>
       </widget>
-      <widget class="QWidget" name="">
+      <widget class="QWidget" name="layoutWidget">
        <property name="geometry">
         <rect>
          <x>680</x>
@@ -630,7 +630,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_9">
         <item>
-         <widget class="QLineEdit" name="lineEdit_12">
+         <widget class="QLineEdit" name="lineEdit_orb_inclination">
           <property name="font">
            <font>
             <family>Courier New</family>
@@ -642,7 +642,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="lineEdit_13">
+         <widget class="QLineEdit" name="lineEdit_orb_eccentricity">
           <property name="font">
            <font>
             <family>Courier New</family>
@@ -654,7 +654,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="lineEdit_16">
+         <widget class="QLineEdit" name="lineEdit_orb_semi_major">
           <property name="font">
            <font>
             <family>Courier New</family>
@@ -666,7 +666,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="lineEdit_17">
+         <widget class="QLineEdit" name="lineEdit_orb_semi_minor">
           <property name="font">
            <font>
             <family>Courier New</family>
@@ -679,7 +679,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="">
+      <widget class="QWidget" name="layoutWidget">
        <property name="geometry">
         <rect>
          <x>582</x>
@@ -820,7 +820,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_11">
         <item>
-         <widget class="QLineEdit" name="lineEdit_18">
+         <widget class="QLineEdit" name="lineEdit_att_y0">
           <property name="font">
            <font>
             <family>Courier New</family>
@@ -831,7 +831,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="lineEdit_19">
+         <widget class="QLineEdit" name="lineEdit_att_p0">
           <property name="font">
            <font>
             <family>Courier New</family>
@@ -842,7 +842,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="lineEdit_20">
+         <widget class="QLineEdit" name="lineEdit_att_r0">
           <property name="font">
            <font>
             <family>Courier New</family>
@@ -991,7 +991,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_14">
         <item>
-         <widget class="QLineEdit" name="lineEdit_21">
+         <widget class="QLineEdit" name="lineEdit_att_w10">
           <property name="font">
            <font>
             <family>Courier New</family>
@@ -1002,7 +1002,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="lineEdit_22">
+         <widget class="QLineEdit" name="lineEdit_att_w20">
           <property name="font">
            <font>
             <family>Courier New</family>
@@ -1013,7 +1013,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="lineEdit_23">
+         <widget class="QLineEdit" name="lineEdit_att_w30">
           <property name="font">
            <font>
             <family>Courier New</family>
@@ -1059,7 +1059,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_15">
         <item>
-         <widget class="QLineEdit" name="lineEdit_24">
+         <widget class="QLineEdit" name="lineEdit_sim_stop_time">
           <property name="font">
            <font>
             <family>Courier New</family>
@@ -1070,7 +1070,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="lineEdit_25">
+         <widget class="QLineEdit" name="lineEdit_sim_step_time">
           <property name="font">
            <font>
             <family>Courier New</family>
@@ -1246,7 +1246,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
        <string/>
       </property>
       <property name="pixmap">
-       <pixmap resource="resources.qrc">:/assets/earth.png</pixmap>
+       <pixmap>:/assets/earth.png</pixmap>
       </property>
       <property name="scaledContents">
        <bool>true</bool>
@@ -1301,8 +1301,6 @@ li.checked::marker { content: &quot;\2612&quot;; }
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
- <resources>
-  <include location="resources.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>
