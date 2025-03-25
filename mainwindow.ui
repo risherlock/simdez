@@ -44,11 +44,11 @@
      <set>Qt::InputMethodHint::ImhMultiLine</set>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>1</number>
     </property>
     <widget class="QWidget" name="tab_3">
      <attribute name="title">
-      <string>Page</string>
+      <string>Inputs</string>
      </attribute>
      <widget class="QGroupBox" name="groupBox">
       <property name="geometry">
@@ -1228,13 +1228,13 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </widget>
     <widget class="QWidget" name="tab">
      <attribute name="title">
-      <string>Tab 1</string>
+      <string>Orbit</string>
      </attribute>
      <widget class="QLabel" name="label_map">
       <property name="geometry">
        <rect>
-        <x>150</x>
-        <y>50</y>
+        <x>110</x>
+        <y>60</y>
         <width>631</width>
         <height>351</height>
        </rect>
@@ -1246,16 +1246,16 @@ li.checked::marker { content: &quot;\2612&quot;; }
        <string/>
       </property>
       <property name="pixmap">
-       <pixmap>:/assets/earth.png</pixmap>
+       <pixmap>assets/earth.png</pixmap>
       </property>
       <property name="scaledContents">
-       <bool>true</bool>
+       <bool>false</bool>
       </property>
      </widget>
     </widget>
     <widget class="QWidget" name="tab_2">
      <attribute name="title">
-      <string>Tab 2</string>
+      <string>Orientation</string>
      </attribute>
      <widget class="QPushButton" name="pushButton">
       <property name="geometry">

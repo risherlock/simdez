@@ -9,6 +9,8 @@
 #include <QQuickView>
 #include <QWidget>
 #include <QUrl>
+#include <Qpainter>
+#include <QPen>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -21,7 +23,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Load the QML file to QQuickView
     QQuickView *view = new QQuickView;
-    view->setSource(QUrl::fromLocalFile("main.qml"));
+    view->setSource(QUrl::fromLocalFile("../../../main.qml"));
 
     // A container widget to link QQuickView to QWidget
     QWidget *container = QWidget::createWindowContainer(view, this);
@@ -31,7 +33,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->quickContainer->setLayout(layout);
     ui->quickContainer->layout()->addWidget(container);
 
-    QPixmap img("../../assets/earth.png");
+    QPixmap img("../../../assets/earth.png");
     ui->label_map->setPixmap(img);
     ui->label_map->setScaledContents(true);
 
@@ -77,7 +79,35 @@ MainWindow::MainWindow(QWidget *parent)
     ui->lineEdit_sim_stop_time->setText(QString::number(json_obj["sim_stop_time"].toDouble()));
     ui->lineEdit_sim_step_time->setText(QString::number(json_obj["sim_step_time"].toDouble()));
 
-    resize(1280, 720);
+    // Paints over the map
+    QPixmap pix = ui->label_map->pixmap(Qt::ReturnByValue);
+    QPainter paint(&pix);
+    int map_width = pix.width();
+    int map_height = pix.height();
+
+    // Groundtrack configuration
+    QPen pen;
+    pen.setWidth(20);
+    pen.setColor(Qt::red);
+    paint.setPen(pen);
+    QBrush brush(Qt::red);
+    paint.setBrush(brush);
+
+    float latitude = -22.5752;
+    float longitude = -144.0848;
+    qDebug() << "Label height: " << map_height;
+    qDebug() << "Label width : " << map_width;
+
+    // Corrected longitude/latitude to pixel conversion
+    int x = static_cast<int> (map_width * 0.5 - (map_width / 360.0f) * longitude);
+    int y = static_cast<int> (map_height * 0.5 - (map_height / 180.0f) * latitude);
+
+    // Draw the point at correct position
+    int radius = 5;
+    paint.drawEllipse(QPoint(x, y), radius, radius);
+    paint.drawEllipse(QPoint(577, 466), radius, radius);
+    paint.drawEllipse(QPoint(1852, 647), radius, radius);
+    ui->label_map->setPixmap(pix);
 }
 
 MainWindow::~MainWindow()

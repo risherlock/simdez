@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.19)
 project(simdez LANGUAGES CXX)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Widgets Quick Quick3D)
+find_package(Qt6 REQUIRED COMPONENTS Core Widgets Quick Quick3D Gui)
 
 qt_standard_project_setup()
 
@@ -14,7 +14,6 @@ qt_add_executable(simdez
 
     satellite.h satellite.cpp
     main.qml Sat.qml
-
 )
 
 target_link_libraries(simdez
@@ -23,6 +22,7 @@ target_link_libraries(simdez
         Qt::Widgets
         Qt6::Quick
         Qt6::Quick3D
+        Qt6::Gui
 )
 
 include(GNUInstallDirs)

@@ -157,7 +157,7 @@ Node {
         Model {
             id: layer_0
             objectName: "Layer_0"
-            source: "meshes/layer_0_mesh.mesh"
+            source: "assets/meshes/layer_0_mesh.mesh"
             materials: [
                 afta_solar1_material,
                 afta_solar22_material,
