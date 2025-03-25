@@ -9,8 +9,44 @@
 #include <QQuickView>
 #include <QWidget>
 #include <QUrl>
-#include <Qpainter>
 #include <QPen>
+
+void MainWindow::gt_init(void)
+{
+    QPixmap img("../../../assets/earth.png");
+    ui->label_map->setPixmap(img);
+    ui->label_map->setScaledContents(true);
+
+    // Paints over the map
+    gt_pixmap = ui->label_map->pixmap(Qt::ReturnByValue);
+    gt_painter.begin(&gt_pixmap);
+    // gt_painter.drawPixmap(&gt_pixmap);
+
+    // Groundtrack configuration
+    QPen pen;
+    pen.setWidth(10);
+    pen.setColor(Qt::red);
+    gt_painter.setPen(pen);
+    QBrush brush(Qt::red);
+    gt_painter.setBrush(brush);
+}
+
+// Draw latitude [deg] and longitude [deg] as groundtrack
+void MainWindow::gt_draw(const double la, const double lo)
+{
+    // Dimension of the image (not the label)
+    int map_width = gt_pixmap.width();
+    int map_height = gt_pixmap.height();
+
+    // Corrected longitude/latitude to pixel conversion
+    int x = static_cast<int> (map_width * 0.5 - (map_width / 360.0f) * lo);
+    int y = static_cast<int> (map_height * 0.5 - (map_height / 180.0f) * la);
+
+    // Draw the point at correct position
+    int radius = 5;
+    gt_painter.drawEllipse(QPoint(x, y), radius, radius);
+    ui->label_map->setPixmap(gt_pixmap);
+}
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -32,10 +68,6 @@ MainWindow::MainWindow(QWidget *parent)
     layout->setSpacing(0);
     ui->quickContainer->setLayout(layout);
     ui->quickContainer->layout()->addWidget(container);
-
-    QPixmap img("../../../assets/earth.png");
-    ui->label_map->setPixmap(img);
-    ui->label_map->setScaledContents(true);
 
     QFile json_file("../../../default.json");
     json_file.open(QIODevice::ReadOnly | QIODevice::Text);
@@ -79,35 +111,12 @@ MainWindow::MainWindow(QWidget *parent)
     ui->lineEdit_sim_stop_time->setText(QString::number(json_obj["sim_stop_time"].toDouble()));
     ui->lineEdit_sim_step_time->setText(QString::number(json_obj["sim_step_time"].toDouble()));
 
-    // Paints over the map
-    QPixmap pix = ui->label_map->pixmap(Qt::ReturnByValue);
-    QPainter paint(&pix);
-    int map_width = pix.width();
-    int map_height = pix.height();
-
-    // Groundtrack configuration
-    QPen pen;
-    pen.setWidth(20);
-    pen.setColor(Qt::red);
-    paint.setPen(pen);
-    QBrush brush(Qt::red);
-    paint.setBrush(brush);
-
     float latitude = -22.5752;
     float longitude = -144.0848;
-    qDebug() << "Label height: " << map_height;
-    qDebug() << "Label width : " << map_width;
 
-    // Corrected longitude/latitude to pixel conversion
-    int x = static_cast<int> (map_width * 0.5 - (map_width / 360.0f) * longitude);
-    int y = static_cast<int> (map_height * 0.5 - (map_height / 180.0f) * latitude);
-
-    // Draw the point at correct position
-    int radius = 5;
-    paint.drawEllipse(QPoint(x, y), radius, radius);
-    paint.drawEllipse(QPoint(577, 466), radius, radius);
-    paint.drawEllipse(QPoint(1852, 647), radius, radius);
-    ui->label_map->setPixmap(pix);
+    gt_init();
+    gt_draw(latitude, longitude);
+    gt_draw(0.0, 0.0);
 }
 
 MainWindow::~MainWindow()
