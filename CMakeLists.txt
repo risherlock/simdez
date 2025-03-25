@@ -11,9 +11,21 @@ qt_add_executable(simdez
     mainwindow.cpp
     mainwindow.h
     mainwindow.ui
-
     satellite.h satellite.cpp
     main.qml Sat.qml
+
+    time.cpp time.h
+    igrf.cpp igrf.h
+    dcm.cpp dcm.h
+    frame.cpp frame.h
+    quat.cpp quat.h
+    euler.h
+    maps.cpp maps.h
+    iau06.cpp iau06.h
+    iau06_data.cpp iau06_data.h
+    attitude.h
+    SGP4.cpp SGP4.h
+    TLE.cpp TLE.h
 )
 
 target_link_libraries(simdez

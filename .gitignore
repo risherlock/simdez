@@ -1,2 +1,13 @@
 build
 .vscode
+dcm.*
+euler.*
+maps.*
+quat.*
+iau06*
+SGP4.*
+time.*
+TLE.*
+igrf*
+frame.*
+attitude.*
