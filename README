@@ -8,3 +8,5 @@ Todos
 =====
 
 1. Create groundtrack widget.
+2. Use multi-threading to plot groundstation and other visualization.
+3. In mainwindow.cpp, relative paths are used. Use resources instead.

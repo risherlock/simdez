@@ -23,7 +23,7 @@
 TLE tle;
 void MainWindow::gt_init(void)
 {
-    QPixmap img("../../../assets/earth.png");
+    QPixmap img("../../assets/earth.png");
     ui->label_map->setPixmap(img);
     ui->label_map->setScaledContents(true);
 
@@ -74,7 +74,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Load the QML file to QQuickView
     QQuickView *view = new QQuickView;
-    view->setSource(QUrl::fromLocalFile("../../../main.qml"));
+    view->setSource(QUrl::fromLocalFile("../../main.qml"));
 
     // A container widget to link QQuickView to QWidget
     QWidget *container = QWidget::createWindowContainer(view, this);
@@ -84,7 +84,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->quickContainer->setLayout(layout);
     ui->quickContainer->layout()->addWidget(container);
 
-    QFile json_file("../../../default.json");
+    QFile json_file("../../default.json");
     json_file.open(QIODevice::ReadOnly | QIODevice::Text);
     QByteArray json_data = json_file.readAll();
     json_file.close();
