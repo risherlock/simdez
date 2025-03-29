@@ -1,2 +1,5 @@
 build
 .vscode
+*.txt.user.*
+*.txt.user
+.qtcreator

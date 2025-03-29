@@ -31,7 +31,7 @@ qt_add_executable(simdez
 target_link_libraries(simdez
     PRIVATE
         Qt6::Core
-        Qt::Widgets
+        Qt6::Widgets
         Qt6::Quick
         Qt6::Quick3D
         Qt6::Gui

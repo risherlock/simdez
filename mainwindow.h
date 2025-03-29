@@ -3,7 +3,7 @@
 
 #include <QMainWindow>
 #include <QJsonObject>
-#include <Qpainter>
+#include <QPainter>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
