@@ -3,7 +3,7 @@
 
 #include <QMainWindow>
 #include <QJsonObject>
-#include <Qpainter>
+// #include <Qpainter>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -21,7 +21,7 @@ public:
 
     // Groundtrack
     QPixmap gt_pixmap;
-    QPainter gt_painter;
+    // QPainter gt_painter;
     void gt_init(void);
     void gt_draw(const double la, const double lo);
 
