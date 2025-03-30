@@ -1,27 +1,20 @@
 #include "satellite.h"
+#include "simulation.h"
+
 #include "mainwindow.h"
+#include "qcustomplot.h"
 #include "ui_mainwindow.h"
 
-#include "qcustomplot.h"
-#include <iostream>
-#include "dcm.h"
-#include "SGP4.h"
-#include "TLE.h"
-#include "igrf.h"
-#include "time.h"
-#include "frame.h"
-
-#include <QJsonDocument>
-#include <QJsonArray>
-#include <QFile>
-#include <QVBoxLayout>
-#include <QQuickView>
-#include <QWidget>
 #include <QUrl>
 #include <QPen>
+#include <QFile>
+#include <QThread>
+#include <QWidget>
+#include <QJsonArray>
+#include <QQuickView>
+#include <QVBoxLayout>
+#include <QJsonDocument>
 
-
-TLE tle;
 void MainWindow::gt_init(void)
 {
     QPixmap img("../../assets/earth.png");
@@ -40,11 +33,6 @@ void MainWindow::gt_init(void)
     gt_painter.setPen(pen);
     QBrush brush(Qt::red);
     gt_painter.setBrush(brush);
-
-    double dcm[3][3];
-    // dcm_x(22.4, dcm);
-    dcm_unit(dcm);
-    qDebug() << dcm[0][0];
 }
 
 // Draw latitude [deg] and longitude [deg] as groundtrack
@@ -170,6 +158,12 @@ void mag_add_data(QCustomPlot *p, double t, double b[3])
     mag_plot(p);
 }
 
+void MainWindow::visualize(double t, double lla[3], double b[3], double q[4])
+{
+    //gt_draw(lla[0], lla[1]);
+    mag_add_data(ui->widget_plot_mag, t, b);
+}
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -233,48 +227,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->lineEdit_sim_stop_time->setText(QString::number(json_obj["sim_stop_time"].toDouble()));
     ui->lineEdit_sim_step_time->setText(QString::number(json_obj["sim_step_time"].toDouble()));
 
-    float latitude = -22.5752;
-    float longitude = -144.0848;
-
     gt_init();
     mag_init_plot(ui->widget_plot_mag);
-
-    char line1[70];
-    char line2[70];
-    double stepmin = 1;
-    double startmin = 0;
-    double stopmin = 500;
-    strncpy(line1, "1 25544U 98067A   25264.51782528 -.00002182  00000-0 -11606-4 0  2927", 69); line1[69] = '\0';
-    strncpy(line2, "2 25544  51.6416 247.4627 0006703 130.5360 325.0288 15.72125391563537", 69); line2[69] = '\0';
-    tle.parseLines(line1, line2);
-
-    int steps = (stopmin - startmin) / stepmin;
-    double dcm[3][3], r_ecef[3], r[3], v[3], lla[3], b[3];
-
-    for (int i = 0; i < steps; i++)
-    {
-        double t = startmin + i * stepmin;
-
-        // Geodetic coordinates of satellite
-        tle.getRV(t, r, v);
-        frame_eci_to_ecef_dcm(tle.dt, dcm);
-        dcm_rotate(dcm, r, r_ecef);
-        frame_ecef_to_lla(r_ecef, lla);
-
-        // Compute magnetic field
-        if (!igrf(tle.dt, lla, IGRF_GEODETIC, b))
-        {
-            qDebug() << "IGRF date error!" << (int)tle.dt.year;
-        }
-        else
-        {
-            qDebug() << t << b[0] << b[1] << b[2];
-            mag_add_data(ui->widget_plot_mag, (double)i, b);
-        }
-
-        // qDebug() << r[0] << "," << r[1] << "," << r[2];
-        gt_draw(lla[0], lla[1]);
-    }
 
     qDebug() << "Done!!";
 }

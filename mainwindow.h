@@ -27,6 +27,9 @@ public:
     void gt_init(void);
     void gt_draw(const double la, const double lo);
 
+public slots:
+    void visualize(double t, double lla[3], double b[3], double q[4]);
+
 private:
     Ui::MainWindow *ui;
     QJsonObject json_obj;
