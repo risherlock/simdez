@@ -2,6 +2,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include "qcustomplot.h"
 #include <iostream>
 #include "dcm.h"
 #include "SGP4.h"
@@ -61,6 +62,112 @@ void MainWindow::gt_draw(const double la, const double lo)
     int radius = 5;
     gt_painter.drawEllipse(QPoint(x, y), radius, radius);
     ui->label_map->setPixmap(gt_pixmap);
+}
+
+QVector<double> x, bx, by, bz, q0, q1, q2, q3;
+
+void mag_init_plot(QCustomPlot *p)
+{
+    // Graph colour and width
+    QPen pen_x(QColor(0, 114, 189));
+    QPen pen_y(QColor(217, 83, 25));
+    QPen pen_z(QColor(237, 177, 32));
+    pen_x.setWidth(2);
+    pen_y.setWidth(2);
+    pen_z.setWidth(2);
+
+    // Labels on the magnetic field
+    p->xAxis->setLabel("Time [s]");
+    p->yAxis->setLabel("uT");
+    p->xAxis->setLabelFont(QFont("Courier New", 12));
+    p->yAxis->setLabelFont(QFont("Courier New", 12));
+    p->xAxis->setLabelColor(Qt::blue);
+    p->yAxis->setLabelColor(Qt::blue);
+    p->addGraph(); // Graph 0 -> x-axis
+    p->addGraph(); // Graph 1 -> y-axis
+    p->addGraph(); // Graph 2 -> z-axis
+    p->graph(0)->setName("x-axis");
+    p->graph(1)->setName("y-axis");
+    p->graph(2)->setName("z-axis");
+    p->legend->setVisible(true);
+    p->graph(0)->setPen(pen_x);
+    p->graph(1)->setPen(pen_y);
+    p->graph(2)->setPen(pen_z);
+    p->replot();
+}
+
+void quat_init_plot(QCustomPlot *p)
+{
+    // Graph colour and width
+    QPen pen_q0(QColor(0, 114, 189));
+    QPen pen_q1(QColor(217, 83, 25));
+    QPen pen_q2(QColor(237, 177, 32));
+    QPen pen_q3(QColor(126, 47, 142));
+    pen_q0.setWidth(2);
+    pen_q1.setWidth(2);
+    pen_q2.setWidth(2);
+    pen_q3.setWidth(2);
+
+    // Labels on the magnetic field
+    p->xAxis->setLabel("Time [s]");
+    p->xAxis->setLabelFont(QFont("Courier New", 12));
+    p->yAxis->setLabelFont(QFont("Courier New", 12));
+    p->xAxis->setLabelColor(Qt::blue);
+    p->yAxis->setLabelColor(Qt::blue);
+    p->addGraph(); // Graph 0 -> q0
+    p->addGraph(); // Graph 1 -> q1
+    p->addGraph(); // Graph 2 -> q2
+    p->addGraph(); // Graph 2 -> q3
+    p->graph(0)->setName("q0");
+    p->graph(1)->setName("q1");
+    p->graph(2)->setName("q3");
+    p->graph(3)->setName("q4");
+    p->legend->setVisible(true);
+    p->graph(0)->setPen(pen_q0);
+    p->graph(1)->setPen(pen_q1);
+    p->graph(1)->setPen(pen_q2);
+    p->graph(2)->setPen(pen_q3);
+    p->replot();
+}
+
+void quat_plot(QCustomPlot *p)
+{
+    p->rescaleAxes();
+    p->replot();
+}
+
+void quat_add_data(QCustomPlot *p, double t, double q[0])
+{
+    x.append(t);
+    q0.append(q[0]);
+    q1.append(q[1]);
+    q2.append(q[2]);
+    q3.append(q[3]);
+    p->graph(0)->setData(x, q0);
+    p->graph(1)->setData(x, q1);
+    p->graph(2)->setData(x, q2);
+    p->graph(2)->setData(x, q3);
+
+    quat_plot(p);
+}
+
+void mag_plot(QCustomPlot *p)
+{
+    p->rescaleAxes();
+    p->replot();
+}
+
+void mag_add_data(QCustomPlot *p, double t, double b[3])
+{
+    x.append(t);
+    bx.append(b[0]);
+    by.append(b[1]);
+    bz.append(b[2]);
+    p->graph(0)->setData(x, bx);
+    p->graph(1)->setData(x, by);
+    p->graph(2)->setData(x, bz);
+
+    mag_plot(p);
 }
 
 MainWindow::MainWindow(QWidget *parent)
@@ -130,14 +237,13 @@ MainWindow::MainWindow(QWidget *parent)
     float longitude = -144.0848;
 
     gt_init();
-    // gt_draw(latitude, longitude);
-    // gt_draw(0.0, 0.0);
+    mag_init_plot(ui->widget_plot_mag);
 
     char line1[70];
     char line2[70];
-    double stepmin = .01;
+    double stepmin = 1;
     double startmin = 0;
-    double stopmin = 200;
+    double stopmin = 500;
     strncpy(line1, "1 25544U 98067A   25264.51782528 -.00002182  00000-0 -11606-4 0  2927", 69); line1[69] = '\0';
     strncpy(line2, "2 25544  51.6416 247.4627 0006703 130.5360 325.0288 15.72125391563537", 69); line2[69] = '\0';
     tle.parseLines(line1, line2);
@@ -160,10 +266,17 @@ MainWindow::MainWindow(QWidget *parent)
         {
             qDebug() << "IGRF date error!" << (int)tle.dt.year;
         }
+        else
+        {
+            qDebug() << t << b[0] << b[1] << b[2];
+            mag_add_data(ui->widget_plot_mag, (double)i, b);
+        }
 
         // qDebug() << r[0] << "," << r[1] << "," << r[2];
         gt_draw(lla[0], lla[1]);
     }
+
+    qDebug() << "Done!!";
 }
 
 MainWindow::~MainWindow()

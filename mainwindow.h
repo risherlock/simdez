@@ -1,6 +1,8 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "qcustomplot.h"
+
 #include <QMainWindow>
 #include <QJsonObject>
 #include <QPainter>
