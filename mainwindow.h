@@ -26,6 +26,7 @@ public:
     QPainter gt_painter;
     void gt_init(void);
     void gt_draw(const double la, const double lo);
+    void simulator();
 
 private:
     Ui::MainWindow *ui;

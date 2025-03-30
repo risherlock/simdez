@@ -19,9 +19,13 @@
 #include <QWidget>
 #include <QUrl>
 #include <QPen>
+#include <QtConcurrent>
 
 
 TLE tle;
+QVector<double> x, bx, by, bz, q0, q1, q2, q3, lat, lon;
+
+
 void MainWindow::gt_init(void)
 {
     QPixmap img("../../assets/earth.png");
@@ -64,7 +68,6 @@ void MainWindow::gt_draw(const double la, const double lo)
     ui->label_map->setPixmap(gt_pixmap);
 }
 
-QVector<double> x, bx, by, bz, q0, q1, q2, q3;
 
 void mag_init_plot(QCustomPlot *p)
 {
@@ -166,8 +169,57 @@ void mag_add_data(QCustomPlot *p, double t, double b[3])
     p->graph(0)->setData(x, bx);
     p->graph(1)->setData(x, by);
     p->graph(2)->setData(x, bz);
+    // p->graph(0)->addData(x,bx);
+    // p->graph(1)->addData(x,by);
+    // p->graph(2)->addData(x,bz);
+
+
 
     mag_plot(p);
+}
+
+
+void MainWindow::simulator()
+{
+    char line1[70];
+    char line2[70];
+    double stepmin = .01;
+    double startmin = 0;
+    double stopmin = 200;
+    strncpy(line1, "1 25544U 98067A   25264.51782528 -.00002182  00000-0 -11606-4 0  2927", 69); line1[69] = '\0';
+    strncpy(line2, "2 25544  51.6416 247.4627 0006703 130.5360 325.0288 15.72125391563537", 69); line2[69] = '\0';
+    tle.parseLines(line1, line2);
+
+    int steps = (stopmin - startmin) / stepmin;
+    double dcm[3][3], r_ecef[3], r[3], v[3], lla[3], b[3];
+
+    for (int i = 0; i < steps; i++)
+    {
+        double t = startmin + i * stepmin;
+
+        // Geodetic coordinates of satellite
+        tle.getRV(t, r, v);
+        frame_eci_to_ecef_dcm(tle.dt, dcm);
+        dcm_rotate(dcm, r, r_ecef);
+        frame_ecef_to_lla(r_ecef, lla);
+
+        // Compute magnetic field
+        // Compute magnetic field
+        if (!igrf(tle.dt, lla, IGRF_GEODETIC, b))
+        {
+            qDebug() << "IGRF date error!" << (int)tle.dt.year;
+        }
+        else
+        {
+            qDebug() << t << b[0] << b[1] << b[2];
+            mag_add_data(ui->widget_plot_mag, (double)i, b);
+        }
+
+        qDebug() << r[0] << "," << r[1] << "," << r[2];
+
+
+        gt_draw(lla[0], lla[1]);
+    }
 }
 
 MainWindow::MainWindow(QWidget *parent)
@@ -233,50 +285,17 @@ MainWindow::MainWindow(QWidget *parent)
     ui->lineEdit_sim_stop_time->setText(QString::number(json_obj["sim_stop_time"].toDouble()));
     ui->lineEdit_sim_step_time->setText(QString::number(json_obj["sim_step_time"].toDouble()));
 
-    float latitude = -22.5752;
-    float longitude = -144.0848;
-
     gt_init();
     mag_init_plot(ui->widget_plot_mag);
 
-    char line1[70];
-    char line2[70];
-    double stepmin = 1;
-    double startmin = 0;
-    double stopmin = 500;
-    strncpy(line1, "1 25544U 98067A   25264.51782528 -.00002182  00000-0 -11606-4 0  2927", 69); line1[69] = '\0';
-    strncpy(line2, "2 25544  51.6416 247.4627 0006703 130.5360 325.0288 15.72125391563537", 69); line2[69] = '\0';
-    tle.parseLines(line1, line2);
-
-    int steps = (stopmin - startmin) / stepmin;
-    double dcm[3][3], r_ecef[3], r[3], v[3], lla[3], b[3];
-
-    for (int i = 0; i < steps; i++)
-    {
-        double t = startmin + i * stepmin;
-
-        // Geodetic coordinates of satellite
-        tle.getRV(t, r, v);
-        frame_eci_to_ecef_dcm(tle.dt, dcm);
-        dcm_rotate(dcm, r, r_ecef);
-        frame_ecef_to_lla(r_ecef, lla);
-
-        // Compute magnetic field
-        if (!igrf(tle.dt, lla, IGRF_GEODETIC, b))
-        {
-            qDebug() << "IGRF date error!" << (int)tle.dt.year;
-        }
-        else
-        {
-            qDebug() << t << b[0] << b[1] << b[2];
-            mag_add_data(ui->widget_plot_mag, (double)i, b);
-        }
-
-        // qDebug() << r[0] << "," << r[1] << "," << r[2];
-        gt_draw(lla[0], lla[1]);
-    }
-
     qDebug() << "Done!!";
+
+    // simulator is run in parallel
+    // to update the data in realtime using simulator, run the update function for the visualization within the simulator
+    QtConcurrent::run([this](){
+        simulator();
+    });
+
 }
 
 MainWindow::~MainWindow()

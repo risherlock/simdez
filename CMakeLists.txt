@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.19)
 project(simdez LANGUAGES CXX)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Widgets Quick Quick3D Gui PrintSupport)
+find_package(Qt6 REQUIRED COMPONENTS Core Widgets Quick Quick3D Gui Concurrent PrintSupport)
 
 qt_standard_project_setup()
 set(CMAKE_CXX_STANDARD 17)
@@ -39,6 +39,7 @@ target_link_libraries(simdez
         Qt6::Quick3D
         Qt6::Gui
         Qt6::PrintSupport
+        Qt6::Concurrent
 )
 
 include(GNUInstallDirs)
