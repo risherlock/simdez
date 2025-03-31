@@ -39,8 +39,10 @@ private:
 
 private slots:
     void onParametersChanged();
-    void on_save_clicked();
-    void on_reload_clicked();
+    void on_pushButton_save_clicked();
+    void on_pushButton_reload_clicked();
+    void on_pushButton_start_simulation_clicked();
+    void on_pushButton_set_simulation_param_clicked();
 };
 
 #endif // MAINWINDOW_H

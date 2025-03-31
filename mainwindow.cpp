@@ -314,46 +314,11 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
-    connect(ui->lineEdit_moi_xx, &QLineEdit::textChanged, this, &MainWindow::onParametersChanged);
-    connect(ui->lineEdit_moi_xy, &QLineEdit::textChanged, this, &MainWindow::onParametersChanged);
-    connect(ui->lineEdit_moi_xz, &QLineEdit::textChanged, this, &MainWindow::onParametersChanged);
-    connect(ui->lineEdit_moi_yx, &QLineEdit::textChanged, this, &MainWindow::onParametersChanged);
-    connect(ui->lineEdit_moi_yy, &QLineEdit::textChanged, this, &MainWindow::onParametersChanged);
-    connect(ui->lineEdit_moi_yz, &QLineEdit::textChanged, this, &MainWindow::onParametersChanged);
-    connect(ui->lineEdit_moi_zx, &QLineEdit::textChanged, this, &MainWindow::onParametersChanged);
-    connect(ui->lineEdit_moi_zy, &QLineEdit::textChanged, this, &MainWindow::onParametersChanged);
-    connect(ui->lineEdit_moi_zz, &QLineEdit::textChanged, this, &MainWindow::onParametersChanged);
-
-    connect(ui->lineEdit_moi_xx, &QLineEdit::textChanged, this, &MainWindow::onParametersChanged);
-    connect(ui->lineEdit_moi_xy, &QLineEdit::textChanged, this, &MainWindow::onParametersChanged);
-    connect(ui->lineEdit_moi_xz, &QLineEdit::textChanged, this, &MainWindow::onParametersChanged);
-    connect(ui->lineEdit_moi_yx, &QLineEdit::textChanged, this, &MainWindow::onParametersChanged);
-    connect(ui->lineEdit_moi_yy, &QLineEdit::textChanged, this, &MainWindow::onParametersChanged);
-    connect(ui->lineEdit_moi_yz, &QLineEdit::textChanged, this, &MainWindow::onParametersChanged);
-    connect(ui->lineEdit_moi_zx, &QLineEdit::textChanged, this, &MainWindow::onParametersChanged);
-    connect(ui->lineEdit_moi_zy, &QLineEdit::textChanged, this, &MainWindow::onParametersChanged);
-    connect(ui->lineEdit_moi_zz, &QLineEdit::textChanged, this, &MainWindow::onParametersChanged);
-
-    connect(ui->lineEdit_em_turns, &QLineEdit::textChanged, this, &MainWindow::onParametersChanged);
-    connect(ui->lineEdit_em_core_length, &QLineEdit::textChanged, this, &MainWindow::onParametersChanged);
-    connect(ui->lineEdit_em_core_area, &QLineEdit::textChanged, this, &MainWindow::onParametersChanged);
-    connect(ui->lineEdit_em_max_current, &QLineEdit::textChanged, this, &MainWindow::onParametersChanged);
-
-    connect(ui->lineEdit_att_y0, &QLineEdit::textChanged, this, &MainWindow::onParametersChanged);
-    connect(ui->lineEdit_att_p0, &QLineEdit::textChanged, this, &MainWindow::onParametersChanged);
-    connect(ui->lineEdit_att_r0, &QLineEdit::textChanged, this, &MainWindow::onParametersChanged);
-    connect(ui->lineEdit_att_w10, &QLineEdit::textChanged, this, &MainWindow::onParametersChanged);
-    connect(ui->lineEdit_att_w20, &QLineEdit::textChanged, this, &MainWindow::onParametersChanged);
-    connect(ui->lineEdit_att_w30, &QLineEdit::textChanged, this, &MainWindow::onParametersChanged);
-
-    connect(ui->textEdit_orb_tle_1, &QTextEdit::textChanged, this, &MainWindow::onParametersChanged);
-    connect(ui->textEdit_orb_tle_1, &QTextEdit::textChanged, this, &MainWindow::onParametersChanged);
-
-    connect(ui->lineEdit_sim_stop_time, &QLineEdit::textChanged, this, &MainWindow::onParametersChanged);
-    connect(ui->lineEdit_sim_step_time, &QLineEdit::textChanged, this, &MainWindow::onParametersChanged);
-
+    try{
+    qDebug()<<"connecting to parameter changed";
 
     ui->setupUi(this);
+    qDebug()<<"initializing parameters";
     initializeParameters();
 
     // Register the class for QML to access variables
@@ -382,6 +347,10 @@ MainWindow::MainWindow(QWidget *parent)
         simulator();
     });
 
+    } catch(QException e){
+        qDebug() << e.what();
+    }
+
 }
 
 MainWindow::~MainWindow()
@@ -390,8 +359,9 @@ MainWindow::~MainWindow()
 }
 
 
-void MainWindow::on_save_clicked()
+void MainWindow::on_pushButton_save_clicked()
 {
+    qDebug() << "save clicked";
     QJsonDocument json_doc = QJsonDocument::fromVariant(parameters);
     QFile json_file("../../default.json");
     json_file.open(QIODevice::WriteOnly | QIODevice::Text);
@@ -400,9 +370,21 @@ void MainWindow::on_save_clicked()
 }
 
 
-void MainWindow::on_reload_clicked()
+void MainWindow::on_pushButton_reload_clicked()
 {
     qDebug() << "parameters reinitialized";
     initializeParameters();
+}
+
+
+void MainWindow::on_pushButton_start_simulation_clicked()
+{
+    onParametersChanged();
+}
+
+
+void MainWindow::on_pushButton_set_simulation_param_clicked()
+{
+    onParametersChanged();
 }
 

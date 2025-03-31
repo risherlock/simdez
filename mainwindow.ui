@@ -1157,7 +1157,23 @@ li.checked::marker { content: &quot;\2612&quot;; }
        </layout>
       </widget>
      </widget>
-     <widget class="QPushButton" name="reload">
+     <widget class="QPushButton" name="pushButton_reload">
+      <property name="geometry">
+       <rect>
+        <x>1120</x>
+        <y>170</y>
+        <width>41</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="icon">
+       <iconset theme="QIcon::ThemeIcon::ViewRefresh"/>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_save">
       <property name="geometry">
        <rect>
         <x>1120</x>
@@ -1170,26 +1186,10 @@ li.checked::marker { content: &quot;\2612&quot;; }
        <string/>
       </property>
       <property name="icon">
-       <iconset theme="QIcon::ThemeIcon::ViewRefresh"/>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="save">
-      <property name="geometry">
-       <rect>
-        <x>1120</x>
-        <y>70</y>
-        <width>41</width>
-        <height>41</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string/>
-      </property>
-      <property name="icon">
        <iconset theme="QIcon::ThemeIcon::DocumentSave"/>
       </property>
      </widget>
-     <widget class="QPushButton" name="pushButton_4">
+     <widget class="QPushButton" name="pushButton_start_simulation">
       <property name="geometry">
        <rect>
         <x>1120</x>
@@ -1221,11 +1221,11 @@ li.checked::marker { content: &quot;\2612&quot;; }
        <iconset theme="QIcon::ThemeIcon::DocumentOpen"/>
       </property>
      </widget>
-     <widget class="QPushButton" name="pushButton_6">
+     <widget class="QPushButton" name="pushButton_set_simulation_param">
       <property name="geometry">
        <rect>
         <x>1120</x>
-        <y>170</y>
+        <y>70</y>
         <width>41</width>
         <height>41</height>
        </rect>
@@ -1234,7 +1234,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
        <string/>
       </property>
       <property name="icon">
-       <iconset theme="QIcon::ThemeIcon::DocumentOpen"/>
+       <iconset theme="QIcon::ThemeIcon::EditPaste"/>
       </property>
      </widget>
      <widget class="QPushButton" name="pushButton_7">
