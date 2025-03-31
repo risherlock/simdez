@@ -1,7 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "qcustomplot.h"
+#include "../../../../qcustomplot.h"
 
 #include <QMainWindow>
 #include <QJsonObject>
@@ -18,7 +18,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
+    explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
     // Groundtrack
@@ -27,10 +27,20 @@ public:
     void gt_init(void);
     void gt_draw(const double la, const double lo);
     void simulator();
+    void initializeParameters();
+    void addConnections();
 
 private:
     Ui::MainWindow *ui;
     QJsonObject json_obj;
+    QMap<QString, QVariant> parameters;
+
+    bool validateJSONKeys();
+
+private slots:
+    void onParametersChanged();
+    void on_save_clicked();
+    void on_reload_clicked();
 };
 
 #endif // MAINWINDOW_H

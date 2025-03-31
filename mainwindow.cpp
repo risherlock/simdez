@@ -24,7 +24,19 @@
 
 TLE tle;
 QVector<double> x, bx, by, bz, q0, q1, q2, q3, lat, lon;
-
+QStringList parameterKeys = {
+                            "moi_xx",  "moi_xy",  "moi_xz",
+                            "moi_yx",  "moi_yy",  "moi_yz",
+                            "moi_zx",  "moi_zy",  "moi_zz",
+                             "em_turns",
+                             "em_core_length",
+                             "em_core_area",
+                             "em_max_current",
+                            "orb_tle_1",  "orb_tle_2",  "orb_is_tle",
+                            "orb_inclination",  "orb_eccentricity",  "orb_semi_major",  "orb_semi_minor",
+                            "att_y0",  "att_p0",  "att_r0",  "att_w10",  "att_w20",  "att_w30",
+                            "sim_stop_time",  "sim_step_time"
+                            };
 
 void MainWindow::gt_init(void)
 {
@@ -169,11 +181,6 @@ void mag_add_data(QCustomPlot *p, double t, double b[3])
     p->graph(0)->setData(x, bx);
     p->graph(1)->setData(x, by);
     p->graph(2)->setData(x, bz);
-    // p->graph(0)->addData(x,bx);
-    // p->graph(1)->addData(x,by);
-    // p->graph(2)->addData(x,bz);
-
-
 
     mag_plot(p);
 }
@@ -186,9 +193,10 @@ void MainWindow::simulator()
     double stepmin = .01;
     double startmin = 0;
     double stopmin = 200;
-    strncpy(line1, "1 25544U 98067A   25264.51782528 -.00002182  00000-0 -11606-4 0  2927", 69); line1[69] = '\0';
-    strncpy(line2, "2 25544  51.6416 247.4627 0006703 130.5360 325.0288 15.72125391563537", 69); line2[69] = '\0';
+    strncpy(line1, parameters["orb_tle_1"].toString().toUtf8().constData(), 69); line1[69] = '\0';
+    strncpy(line2, parameters["orb_tle_2"].toString().toUtf8().constData(), 69); line2[69] = '\0';
     tle.parseLines(line1, line2);
+
 
     int steps = (stopmin - startmin) / stepmin;
     double dcm[3][3], r_ecef[3], r[3], v[3], lla[3], b[3];
@@ -217,16 +225,136 @@ void MainWindow::simulator()
 
         qDebug() << r[0] << "," << r[1] << "," << r[2];
 
-
         gt_draw(lla[0], lla[1]);
     }
+}
+
+void MainWindow::onParametersChanged()
+{
+    parameters["moi_xx"] = ui->lineEdit_moi_xx->text().toDouble();
+    parameters["moi_xy"] = ui->lineEdit_moi_xy->text().toDouble();
+    parameters["moi_xz"] = ui->lineEdit_moi_xz->text().toDouble();
+    parameters["moi_yx"] = ui->lineEdit_moi_yx->text().toDouble();
+    parameters["moi_yy"] = ui->lineEdit_moi_yy->text().toDouble();
+    parameters["moi_yz"] = ui->lineEdit_moi_yz->text().toDouble();
+    parameters["moi_zx"] = ui->lineEdit_moi_zx->text().toDouble();
+    parameters["moi_zy"] = ui->lineEdit_moi_zy->text().toDouble();
+    parameters["moi_zz"] = ui->lineEdit_moi_zz->text().toDouble();
+
+    parameters["em_turns"] = ui->lineEdit_em_turns->text().toDouble();
+    parameters["em_core_length"] = ui->lineEdit_em_core_length->text().toDouble();
+    parameters["em_core_area"] = ui->lineEdit_em_core_area->text().toDouble();
+    parameters["em_max_current"] = ui->lineEdit_em_max_current->text().toDouble();
+
+    parameters["att_y0"] = ui->lineEdit_att_y0->text().toDouble();
+    parameters["att_p0"] = ui->lineEdit_att_p0->text().toDouble();
+    parameters["att_r0"] = ui->lineEdit_att_r0->text().toDouble();
+    parameters["att_w10"] = ui->lineEdit_att_w10->text().toDouble();
+    parameters["att_w20"] = ui->lineEdit_att_w20->text().toDouble();
+    parameters["att_w30"] = ui->lineEdit_att_w30->text().toDouble();
+
+    parameters["orb_tle_1"] = ui->textEdit_orb_tle_1->toPlainText();
+    parameters["orb_tle_2"] = ui->textEdit_orb_tle_1->toPlainText();
+
+    parameters["sim_stop_time"] = ui->lineEdit_sim_stop_time->text().toDouble();
+    parameters["sim_step_time"] = ui->lineEdit_sim_step_time->text().toDouble();
+
+}
+
+void MainWindow::initializeParameters()
+{
+
+    QFile json_file("../../default.json");
+    json_file.open(QIODevice::ReadOnly | QIODevice::Text);
+    QByteArray json_data = json_file.readAll();
+    json_file.close();
+    QJsonDocument json_doc = QJsonDocument::fromJson(json_data);
+    json_obj = json_doc.object();
+    bool isCorrectJSON = true;
+
+    for (const QString &key : parameterKeys) {
+        if (!json_obj.contains(key)) {
+            qDebug() << "Json file error!";
+            qDebug() << key;
+            isCorrectJSON=false;
+        }
+    }
+
+    parameters = json_obj.toVariantMap();
+    ui->lineEdit_moi_xx->setText(QString::number(parameters["moi_xx"].toDouble()));
+    ui->lineEdit_moi_xy->setText(QString::number(parameters["moi_xy"].toDouble()));
+    ui->lineEdit_moi_xz->setText(QString::number(parameters["moi_xz"].toDouble()));
+    ui->lineEdit_moi_yx->setText(QString::number(parameters["moi_yx"].toDouble()));
+    ui->lineEdit_moi_yy->setText(QString::number(parameters["moi_yy"].toDouble()));
+    ui->lineEdit_moi_yz->setText(QString::number(parameters["moi_yz"].toDouble()));
+    ui->lineEdit_moi_zx->setText(QString::number(parameters["moi_zx"].toDouble()));
+    ui->lineEdit_moi_zy->setText(QString::number(parameters["moi_zy"].toDouble()));
+    ui->lineEdit_moi_zz->setText(QString::number(parameters["moi_zz"].toDouble()));
+
+    ui->lineEdit_em_turns->setText(QString::number(parameters["em_turns"].toDouble()));
+    ui->lineEdit_em_core_length->setText(QString::number(parameters["em_core_length"].toDouble()));
+    ui->lineEdit_em_core_area->setText(QString::number(parameters["em_core_area"].toDouble()));
+    ui->lineEdit_em_max_current->setText(QString::number(parameters["em_max_current"].toDouble()));
+
+    ui->lineEdit_att_y0->setText(QString::number(parameters["att_y0"].toDouble()));
+    ui->lineEdit_att_p0->setText(QString::number(parameters["att_p0"].toDouble()));
+    ui->lineEdit_att_r0->setText(QString::number(parameters["att_r0"].toDouble()));
+    ui->lineEdit_att_w10->setText(QString::number(parameters["att_w10"].toDouble()));
+    ui->lineEdit_att_w20->setText(QString::number(parameters["att_w20"].toDouble()));
+    ui->lineEdit_att_w30->setText(QString::number(parameters["att_w30"].toDouble()));
+
+    ui->textEdit_orb_tle_1->setPlainText(parameters["orb_tle_1"].toString());
+    ui->textEdit_orb_tle_2->setPlainText(parameters["orb_tle_2"].toString());
+
+    ui->lineEdit_sim_stop_time->setText(QString::number(parameters["sim_stop_time"].toDouble()));
+    ui->lineEdit_sim_step_time->setText(QString::number(parameters["sim_step_time"].toDouble()));
 }
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
+    connect(ui->lineEdit_moi_xx, &QLineEdit::textChanged, this, &MainWindow::onParametersChanged);
+    connect(ui->lineEdit_moi_xy, &QLineEdit::textChanged, this, &MainWindow::onParametersChanged);
+    connect(ui->lineEdit_moi_xz, &QLineEdit::textChanged, this, &MainWindow::onParametersChanged);
+    connect(ui->lineEdit_moi_yx, &QLineEdit::textChanged, this, &MainWindow::onParametersChanged);
+    connect(ui->lineEdit_moi_yy, &QLineEdit::textChanged, this, &MainWindow::onParametersChanged);
+    connect(ui->lineEdit_moi_yz, &QLineEdit::textChanged, this, &MainWindow::onParametersChanged);
+    connect(ui->lineEdit_moi_zx, &QLineEdit::textChanged, this, &MainWindow::onParametersChanged);
+    connect(ui->lineEdit_moi_zy, &QLineEdit::textChanged, this, &MainWindow::onParametersChanged);
+    connect(ui->lineEdit_moi_zz, &QLineEdit::textChanged, this, &MainWindow::onParametersChanged);
+
+    connect(ui->lineEdit_moi_xx, &QLineEdit::textChanged, this, &MainWindow::onParametersChanged);
+    connect(ui->lineEdit_moi_xy, &QLineEdit::textChanged, this, &MainWindow::onParametersChanged);
+    connect(ui->lineEdit_moi_xz, &QLineEdit::textChanged, this, &MainWindow::onParametersChanged);
+    connect(ui->lineEdit_moi_yx, &QLineEdit::textChanged, this, &MainWindow::onParametersChanged);
+    connect(ui->lineEdit_moi_yy, &QLineEdit::textChanged, this, &MainWindow::onParametersChanged);
+    connect(ui->lineEdit_moi_yz, &QLineEdit::textChanged, this, &MainWindow::onParametersChanged);
+    connect(ui->lineEdit_moi_zx, &QLineEdit::textChanged, this, &MainWindow::onParametersChanged);
+    connect(ui->lineEdit_moi_zy, &QLineEdit::textChanged, this, &MainWindow::onParametersChanged);
+    connect(ui->lineEdit_moi_zz, &QLineEdit::textChanged, this, &MainWindow::onParametersChanged);
+
+    connect(ui->lineEdit_em_turns, &QLineEdit::textChanged, this, &MainWindow::onParametersChanged);
+    connect(ui->lineEdit_em_core_length, &QLineEdit::textChanged, this, &MainWindow::onParametersChanged);
+    connect(ui->lineEdit_em_core_area, &QLineEdit::textChanged, this, &MainWindow::onParametersChanged);
+    connect(ui->lineEdit_em_max_current, &QLineEdit::textChanged, this, &MainWindow::onParametersChanged);
+
+    connect(ui->lineEdit_att_y0, &QLineEdit::textChanged, this, &MainWindow::onParametersChanged);
+    connect(ui->lineEdit_att_p0, &QLineEdit::textChanged, this, &MainWindow::onParametersChanged);
+    connect(ui->lineEdit_att_r0, &QLineEdit::textChanged, this, &MainWindow::onParametersChanged);
+    connect(ui->lineEdit_att_w10, &QLineEdit::textChanged, this, &MainWindow::onParametersChanged);
+    connect(ui->lineEdit_att_w20, &QLineEdit::textChanged, this, &MainWindow::onParametersChanged);
+    connect(ui->lineEdit_att_w30, &QLineEdit::textChanged, this, &MainWindow::onParametersChanged);
+
+    connect(ui->textEdit_orb_tle_1, &QTextEdit::textChanged, this, &MainWindow::onParametersChanged);
+    connect(ui->textEdit_orb_tle_1, &QTextEdit::textChanged, this, &MainWindow::onParametersChanged);
+
+    connect(ui->lineEdit_sim_stop_time, &QLineEdit::textChanged, this, &MainWindow::onParametersChanged);
+    connect(ui->lineEdit_sim_step_time, &QLineEdit::textChanged, this, &MainWindow::onParametersChanged);
+
+
     ui->setupUi(this);
+    initializeParameters();
 
     // Register the class for QML to access variables
     qmlRegisterType<satellite>("Satellite", 1, 0, "Satellite");
@@ -242,48 +370,6 @@ MainWindow::MainWindow(QWidget *parent)
     layout->setSpacing(0);
     ui->quickContainer->setLayout(layout);
     ui->quickContainer->layout()->addWidget(container);
-
-    QFile json_file("../../default.json");
-    json_file.open(QIODevice::ReadOnly | QIODevice::Text);
-    QByteArray json_data = json_file.readAll();
-    json_file.close();
-    QJsonDocument json_doc = QJsonDocument::fromJson(json_data);
-    json_obj = json_doc.object();
-
-    if (json_obj.contains("moi_xx"))
-    {
-        double moi_xx = json_obj["moi_xx"].toDouble();
-        qDebug() << "Original moi_xx:" << moi_xx;
-    }
-    else
-    {
-        qDebug() << "Json file error!";
-    }
-
-    ui->lineEdit_moi_xx->setText(QString::number(json_obj["moi_xx"].toDouble()));
-    ui->lineEdit_moi_xy->setText(QString::number(json_obj["moi_xy"].toDouble()));
-    ui->lineEdit_moi_xz->setText(QString::number(json_obj["moi_xz"].toDouble()));
-    ui->lineEdit_moi_yx->setText(QString::number(json_obj["moi_yx"].toDouble()));
-    ui->lineEdit_moi_yy->setText(QString::number(json_obj["moi_yy"].toDouble()));
-    ui->lineEdit_moi_yz->setText(QString::number(json_obj["moi_yz"].toDouble()));
-    ui->lineEdit_moi_zx->setText(QString::number(json_obj["moi_zx"].toDouble()));
-    ui->lineEdit_moi_zy->setText(QString::number(json_obj["moi_zy"].toDouble()));
-    ui->lineEdit_moi_zz->setText(QString::number(json_obj["moi_zz"].toDouble()));
-
-    ui->lineEdit_em_turns->setText(QString::number(json_obj["em_turns"].toDouble()));
-    ui->lineEdit_em_core_length->setText(QString::number(json_obj["em_core_length"].toDouble()));
-    ui->lineEdit_em_core_area->setText(QString::number(json_obj["em_core_area"].toDouble()));
-    ui->lineEdit_em_max_current->setText(QString::number(json_obj["em_max_current"].toDouble()));
-
-    ui->lineEdit_att_y0->setText(QString::number(json_obj["att_y0"].toDouble()));
-    ui->lineEdit_att_p0->setText(QString::number(json_obj["att_p0"].toDouble()));
-    ui->lineEdit_att_r0->setText(QString::number(json_obj["att_r0"].toDouble()));
-    ui->lineEdit_att_w10->setText(QString::number(json_obj["att_w10"].toDouble()));
-    ui->lineEdit_att_w20->setText(QString::number(json_obj["att_w20"].toDouble()));
-    ui->lineEdit_att_w30->setText(QString::number(json_obj["att_w30"].toDouble()));
-
-    ui->lineEdit_sim_stop_time->setText(QString::number(json_obj["sim_stop_time"].toDouble()));
-    ui->lineEdit_sim_step_time->setText(QString::number(json_obj["sim_step_time"].toDouble()));
 
     gt_init();
     mag_init_plot(ui->widget_plot_mag);
@@ -302,3 +388,21 @@ MainWindow::~MainWindow()
 {
     delete ui;
 }
+
+
+void MainWindow::on_save_clicked()
+{
+    QJsonDocument json_doc = QJsonDocument::fromVariant(parameters);
+    QFile json_file("../../default.json");
+    json_file.open(QIODevice::WriteOnly | QIODevice::Text);
+    json_file.write(json_doc.toJson());
+    json_file.close();
+}
+
+
+void MainWindow::on_reload_clicked()
+{
+    qDebug() << "parameters reinitialized";
+    initializeParameters();
+}
+
