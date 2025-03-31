@@ -43,16 +43,16 @@ void MainWindow::gt_draw(const double la, const double lo)
     int map_height = gt_pixmap.height();
 
     // Corrected longitude/latitude to pixel conversion
-    int x = static_cast<int> (map_width * 0.5 - (map_width / 360.0f) * lo);
-    int y = static_cast<int> (map_height * 0.5 - (map_height / 180.0f) * la);
+    int x_axis = static_cast<int> (map_width * 0.5 - (map_width / 360.0f) * lo);
+    int y_axis = static_cast<int> (map_height * 0.5 - (map_height / 180.0f) * la);
 
     // Draw the point at correct position
     int radius = 5;
-    gt_painter.drawEllipse(QPoint(x, y), radius, radius);
+    gt_painter.drawEllipse(QPoint(x_axis, y_axis), radius, radius);
     ui->label_map->setPixmap(gt_pixmap);
 }
 
-QVector<double> x, bx, by, bz, q0, q1, q2, q3;
+QVector<double> vec_x, bx, by, bz, q0, q1, q2, q3;
 
 void mag_init_plot(QCustomPlot *p)
 {
@@ -82,6 +82,8 @@ void mag_init_plot(QCustomPlot *p)
     p->graph(1)->setPen(pen_y);
     p->graph(2)->setPen(pen_z);
     p->replot();
+
+    p->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectPlottables);
 }
 
 void quat_init_plot(QCustomPlot *p)
@@ -126,42 +128,36 @@ void quat_plot(QCustomPlot *p)
 
 void quat_add_data(QCustomPlot *p, double t, double q[0])
 {
-    x.append(t);
+    vec_x.append(t);
     q0.append(q[0]);
     q1.append(q[1]);
     q2.append(q[2]);
     q3.append(q[3]);
-    p->graph(0)->setData(x, q0);
-    p->graph(1)->setData(x, q1);
-    p->graph(2)->setData(x, q2);
-    p->graph(2)->setData(x, q3);
-
+    p->graph(0)->setData(vec_x, q0);
+    p->graph(1)->setData(vec_x, q1);
+    p->graph(2)->setData(vec_x, q2);
+    p->graph(2)->setData(vec_x, q3);
     quat_plot(p);
 }
 
-void mag_plot(QCustomPlot *p)
+void MainWindow::append_simdata(double t, double lla[3], double b[3], double q[4])
 {
-    p->rescaleAxes();
-    p->replot();
-}
+    static bool is_first = true;
 
-void mag_add_data(QCustomPlot *p, double t, double b[3])
-{
-    x.append(t);
+    if(is_first)
+    {
+        timer_plot_mag->start(33);
+        is_first = false;
+    }
+
+    qDebug() << "," << t << b[0] << b[1] << b[2];
+
+    vec_x.append(t);
     bx.append(b[0]);
     by.append(b[1]);
     bz.append(b[2]);
-    p->graph(0)->setData(x, bx);
-    p->graph(1)->setData(x, by);
-    p->graph(2)->setData(x, bz);
 
-    mag_plot(p);
-}
-
-void MainWindow::visualize(double t, double lla[3], double b[3], double q[4])
-{
     gt_draw(lla[0], lla[1]);
-    mag_add_data(ui->widget_plot_mag, t, b);
 }
 
 MainWindow::MainWindow(QWidget *parent)
@@ -180,7 +176,7 @@ MainWindow::MainWindow(QWidget *parent)
     // A container widget to link QQuickView to QWidget
     QWidget *container = QWidget::createWindowContainer(view, this);
     QVBoxLayout *layout = new QVBoxLayout(ui->quickContainer);
-    layout->setContentsMargins(0, 0, 0, 0);
+    //layout->setContentsMgt_drawargins(0, 0, 0, 0);
     layout->setSpacing(0);
     ui->quickContainer->setLayout(layout);
     ui->quickContainer->layout()->addWidget(container);
@@ -229,6 +225,18 @@ MainWindow::MainWindow(QWidget *parent)
 
     gt_init();
     mag_init_plot(ui->widget_plot_mag);
+
+    // Timer starts on first signal from simulation::data_ready.
+    timer_plot_mag = new QTimer(this);
+
+    connect(timer_plot_mag, &QTimer::timeout, this, [this]()
+    {
+        ui->widget_plot_mag->graph(0)->setData(vec_x, bx);
+        ui->widget_plot_mag->graph(1)->setData(vec_x, by);
+        ui->widget_plot_mag->graph(2)->setData(vec_x, bz);
+        ui->widget_plot_mag->rescaleAxes();
+        ui->widget_plot_mag->replot();
+    });
 
     qDebug() << "Done!!";
 }

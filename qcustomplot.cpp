@@ -21683,7 +21683,7 @@ void QCPGraph::drawImpulsePlot(QCPPainter *painter, const QVector<QPointF> &line
 
 /*! \internal
 
-  Returns via \a lineData the data points that need to be visualized for this graph when plotting
+  Returns via \a lineData the data points that need to be append_simdatad for this graph when plotting
   graph lines, taking into consideration the currently visible axis ranges and, if \ref
   setAdaptiveSampling is enabled, local point densities. The considered data can be restricted
   further by \a begin and \a end, e.g. to only plot a certain segment of the data (see \ref
@@ -21775,7 +21775,7 @@ void QCPGraph::getOptimizedLineData(QVector<QCPGraphData> *lineData, const QCPGr
 
 /*! \internal
 
-  Returns via \a scatterData the data points that need to be visualized for this graph when
+  Returns via \a scatterData the data points that need to be append_simdatad for this graph when
   plotting scatter points, taking into consideration the currently visible axis ranges and, if \ref
   setAdaptiveSampling is enabled, local point densities. The considered data can be restricted
   further by \a begin and \a end, e.g. to only plot a certain segment of the data (see \ref

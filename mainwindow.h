@@ -28,9 +28,10 @@ public:
     void gt_draw(const double la, const double lo);
 
 public slots:
-    void visualize(double t, double lla[3], double b[3], double q[4]);
+    void append_simdata(double t, double lla[3], double b[3], double q[4]);
 
 private:
+    QTimer *timer_plot_mag;
     Ui::MainWindow *ui;
     QJsonObject json_obj;
 };
