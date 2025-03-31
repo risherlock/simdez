@@ -2,12 +2,13 @@
 #define SIMULATION_H
 
 #include <QObject>
+#include <QThread>
 
-class simulation : public QObject
+class simulation : public QThread
 {
     Q_OBJECT
 public:
-    explicit simulation(QObject *parent = nullptr);
+    explicit simulation(QThread *parent = nullptr);
     bool stop_flag = false;
 
 signals:

@@ -10,8 +10,8 @@
 #include <QDebug>
 #include <QThread>
 
-simulation::simulation(QObject *parent)
-    : QObject{parent}
+simulation::simulation(QThread *parent)
+    : QThread{parent}
 {}
 
 TLE tle;
@@ -22,7 +22,7 @@ void simulation::run(void)
     {
         char line1[70];
         char line2[70];
-        double stepmin = 10;
+        double stepmin = 1;
         double startmin = 0;
         double stopmin = 600;
         strncpy(line1, "1 25544U 98067A   25264.51782528 -.00002182  00000-0 -11606-4 0  2927", 69); line1[69] = '\0';
@@ -56,8 +56,8 @@ void simulation::run(void)
             //qDebug() << r[0] << "," << r[1] << "," << r[2];
             //gt_draw(lla[0], lla[1]);
 
+            QThread::msleep(20);
             emit data_generated(t, lla, b, q);
-            QThread::msleep(2);
         }
         stop_flag = true;
     }

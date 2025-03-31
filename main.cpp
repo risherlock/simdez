@@ -10,13 +10,8 @@ int main(int argc, char *argv[])
     MainWindow w;
     w.show();
 
-    QThread *simulation_thread = new QThread();
-    simulation *simulation_worker = new simulation();
-    simulation_worker->moveToThread(simulation_thread);
-
-    QObject::connect(simulation_thread, &QThread::started, simulation_worker, &simulation::run);
-    QObject::connect(simulation_worker, &simulation::data_generated, &w, &MainWindow::visualize);
+    simulation *simulation_thread = new simulation();
+    QObject::connect(simulation_thread, &simulation::data_generated, &w, &MainWindow::visualize);
     simulation_thread->start();
-
     return a.exec();
 }

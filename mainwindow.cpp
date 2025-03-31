@@ -160,7 +160,7 @@ void mag_add_data(QCustomPlot *p, double t, double b[3])
 
 void MainWindow::visualize(double t, double lla[3], double b[3], double q[4])
 {
-    //gt_draw(lla[0], lla[1]);
+    gt_draw(lla[0], lla[1]);
     mag_add_data(ui->widget_plot_mag, t, b);
 }
 
