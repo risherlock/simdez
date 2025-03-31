@@ -15,6 +15,10 @@
 #include <QVBoxLayout>
 #include <QJsonDocument>
 
+extern QVector<double> t, bx, by, bz;
+extern bool stop_flag;
+QVector<double> q0, q1, q2, q3;
+
 void MainWindow::gt_init(void)
 {
     QPixmap img("../../assets/earth.png");
@@ -24,7 +28,6 @@ void MainWindow::gt_init(void)
     // Paints over the map
     gt_pixmap = ui->label_map->pixmap(Qt::ReturnByValue);
     gt_painter.begin(&gt_pixmap);
-    // gt_painter.drawPixmap(&gt_pixmap);
 
     // Groundtrack configuration
     QPen pen;
@@ -51,8 +54,6 @@ void MainWindow::gt_draw(const double la, const double lo)
     gt_painter.drawEllipse(QPoint(x_axis, y_axis), radius, radius);
     ui->label_map->setPixmap(gt_pixmap);
 }
-
-QVector<double> vec_x, bx, by, bz, q0, q1, q2, q3;
 
 void mag_init_plot(QCustomPlot *p)
 {
@@ -126,18 +127,18 @@ void quat_plot(QCustomPlot *p)
     p->replot();
 }
 
-void quat_add_data(QCustomPlot *p, double t, double q[0])
+void quat_add_data(QCustomPlot *p, double time, double q[0])
 {
-    vec_x.append(t);
+    t.append(time);
     q0.append(q[0]);
     q1.append(q[1]);
     q2.append(q[2]);
     q3.append(q[3]);
-    p->graph(0)->setData(vec_x, q0);
-    p->graph(1)->setData(vec_x, q1);
-    p->graph(2)->setData(vec_x, q2);
-    p->graph(2)->setData(vec_x, q3);
-    quat_plot(p);
+    //p->graph(0)->setData(time, q0);
+    //p->graph(1)->setData(time, q1);
+    //p->graph(2)->setDafalseta(time, q2);
+    //p->graph(2)->setData(time, q3);
+    //quat_plot(p);
 }
 
 void MainWindow::append_simdata(double t, double lla[3], double b[3], double q[4])
@@ -146,16 +147,9 @@ void MainWindow::append_simdata(double t, double lla[3], double b[3], double q[4
 
     if(is_first)
     {
-        timer_plot_mag->start(33);
         is_first = false;
+        timer_plot_mag->start(33);
     }
-
-    qDebug() << "," << t << b[0] << b[1] << b[2];
-
-    vec_x.append(t);
-    bx.append(b[0]);
-    by.append(b[1]);
-    bz.append(b[2]);
 
     gt_draw(lla[0], lla[1]);
 }
@@ -176,7 +170,6 @@ MainWindow::MainWindow(QWidget *parent)
     // A container widget to link QQuickView to QWidget
     QWidget *container = QWidget::createWindowContainer(view, this);
     QVBoxLayout *layout = new QVBoxLayout(ui->quickContainer);
-    //layout->setContentsMgt_drawargins(0, 0, 0, 0);
     layout->setSpacing(0);
     ui->quickContainer->setLayout(layout);
     ui->quickContainer->layout()->addWidget(container);
@@ -226,22 +219,23 @@ MainWindow::MainWindow(QWidget *parent)
     gt_init();
     mag_init_plot(ui->widget_plot_mag);
 
-    // Timer starts on first signal from simulation::data_ready.
     timer_plot_mag = new QTimer(this);
-
     connect(timer_plot_mag, &QTimer::timeout, this, [this]()
-    {
-        ui->widget_plot_mag->graph(0)->setData(vec_x, bx);
-        ui->widget_plot_mag->graph(1)->setData(vec_x, by);
-        ui->widget_plot_mag->graph(2)->setData(vec_x, bz);
-        ui->widget_plot_mag->rescaleAxes();
-        ui->widget_plot_mag->replot();
-    });
-
-    qDebug() << "Done!!";
+            {
+                ui->widget_plot_mag->graph(0)->setData(t, bx);
+                ui->widget_plot_mag->graph(1)->setData(t, by);
+                ui->widget_plot_mag->graph(2)->setData(t, bz);
+                ui->widget_plot_mag->rescaleAxes();
+                ui->widget_plot_mag->replot();
+            });
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::on_pushButton_4_clicked()
+{
+    qDebug() << "Reached!";
 }

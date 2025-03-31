@@ -10,6 +10,9 @@
 #include <QObject>
 #include <QThread>
 
+QVector<double> t, bx, by, bz;
+bool stop_flag = false;
+
 simulation::simulation(QObject *parent)
     : QObject{parent}
 {
@@ -33,25 +36,26 @@ void simulation::run(void)
     {
         double dcm[3][3], r_ecef[3], r[3], v[3], lla[3], b[3];
         double q[4] = {1, 0, 0, 0};
-        double t = startmin + i * stepmin;
+        double time = startmin + i * stepmin;
 
-        // Geodetic coordinates of satellite
-        tle.getRV(t, r, v);
+        // Orbit propagation and IGRF
+        tle.getRV(time, r, v);
         frame_eci_to_ecef_dcm(tle.dt, dcm);
         dcm_rotate(dcm, r, r_ecef);
         frame_ecef_to_lla(r_ecef, lla);
+        igrf(tle.dt, lla, IGRF_GEODETIC, b);
 
-        // Compute magnetic field
-        if (!igrf(tle.dt, lla, IGRF_GEODETIC, b))
-        {
-            qDebug() << "IGRF date error!" << (int)tle.dt.year;
-        }
-        qDebug() << t << b[0] << b[1] << b[2];
-        //qDebug() << r[0] << "," << r[1] << "," << r[2];
+        // Simulation output
+        t.append(time);
+        bx.append(b[0]);
+        by.append(b[1]);
+        bz.append(b[2]);
 
-        emit data_generated(t, lla, b, q);
-        QThread::msleep(20);
+        qDebug() << b[0];
+
         i++;
+        emit data_generated(time, lla, b, q);
+        QThread::msleep(20);
 
         if(i >= steps)
         {

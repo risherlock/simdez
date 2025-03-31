@@ -30,6 +30,9 @@ public:
 public slots:
     void append_simdata(double t, double lla[3], double b[3], double q[4]);
 
+private slots:
+    void on_pushButton_4_clicked();
+
 private:
     QTimer *timer_plot_mag;
     Ui::MainWindow *ui;

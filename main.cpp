@@ -13,9 +13,6 @@ int main(int argc, char *argv[])
     QThread *simulation_thread = new QThread();
     simulation *simulation_worker = new simulation();
     simulation_worker->moveToThread(simulation_thread);
-
-    // You need to start a method of your worker class in the thread.
-    // https://forum.qt.io/topic/157060/optimizing-regular-qcustomplot/15
     QObject::connect(simulation_thread, &QThread::started, simulation_worker, &simulation::run);
     QObject::connect(simulation_worker, &simulation::data_generated, &w, &MainWindow::append_simdata);
     simulation_thread->start();

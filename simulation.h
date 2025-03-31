@@ -4,15 +4,18 @@
 #include <QObject>
 #include "TLE.h"
 
+extern QVector<double> t, bx, by, bz;
+extern bool stop_flag;
+
 class simulation : public QObject
 {
     Q_OBJECT
+
+signals:
+    void data_generated(double time, double lla[3], double b[3], double q[4]);
+
 public:
     explicit simulation(QObject *parent = nullptr);
-    bool stop_flag = false;
-
-Q_SIGNALS:
-    void data_generated(double t, double lla[3], double b[3], double q[4]);
 
 private:
     double stepmin;
