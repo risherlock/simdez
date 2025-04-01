@@ -1,29 +1,25 @@
 #include "satellite.h"
+#include "simulation.h"
+
 #include "mainwindow.h"
+#include "qcustomplot.h"
 #include "ui_mainwindow.h"
 
-#include "qcustomplot.h"
-#include <iostream>
-#include "dcm.h"
-#include "SGP4.h"
-#include "TLE.h"
-#include "igrf.h"
-#include "time.h"
-#include "frame.h"
-
-#include <QJsonDocument>
-#include <QJsonArray>
-#include <QFile>
-#include <QVBoxLayout>
-#include <QQuickView>
-#include <QWidget>
 #include <QUrl>
 #include <QPen>
 #include <QtConcurrent>
+#include <QFile>
+#include <QThread>
+#include <QWidget>
+#include <QJsonArray>
+#include <QQuickView>
+#include <QVBoxLayout>
+#include <QJsonDocument>
 
+extern QVector<double> t, bx, by, bz;
+extern bool stop_flag;
+QVector<double> q0, q1, q2, q3;
 
-TLE tle;
-QVector<double> x, bx, by, bz, q0, q1, q2, q3, lat, lon;
 QStringList parameterKeys = {
                             "moi_xx",  "moi_xy",  "moi_xz",
                             "moi_yx",  "moi_yy",  "moi_yz",
@@ -47,7 +43,6 @@ void MainWindow::gt_init(void)
     // Paints over the map
     gt_pixmap = ui->label_map->pixmap(Qt::ReturnByValue);
     gt_painter.begin(&gt_pixmap);
-    // gt_painter.drawPixmap(&gt_pixmap);
 
     // Groundtrack configuration
     QPen pen;
@@ -56,11 +51,6 @@ void MainWindow::gt_init(void)
     gt_painter.setPen(pen);
     QBrush brush(Qt::red);
     gt_painter.setBrush(brush);
-
-    double dcm[3][3];
-    // dcm_x(22.4, dcm);
-    dcm_unit(dcm);
-    qDebug() << dcm[0][0];
 }
 
 // Draw latitude [deg] and longitude [deg] as groundtrack
@@ -71,15 +61,14 @@ void MainWindow::gt_draw(const double la, const double lo)
     int map_height = gt_pixmap.height();
 
     // Corrected longitude/latitude to pixel conversion
-    int x = static_cast<int> (map_width * 0.5 - (map_width / 360.0f) * lo);
-    int y = static_cast<int> (map_height * 0.5 - (map_height / 180.0f) * la);
+    int x_axis = static_cast<int> (map_width * 0.5 - (map_width / 360.0f) * lo);
+    int y_axis = static_cast<int> (map_height * 0.5 - (map_height / 180.0f) * la);
 
     // Draw the point at correct position
     int radius = 5;
-    gt_painter.drawEllipse(QPoint(x, y), radius, radius);
+    gt_painter.drawEllipse(QPoint(x_axis, y_axis), radius, radius);
     ui->label_map->setPixmap(gt_pixmap);
 }
-
 
 void mag_init_plot(QCustomPlot *p)
 {
@@ -109,6 +98,8 @@ void mag_init_plot(QCustomPlot *p)
     p->graph(1)->setPen(pen_y);
     p->graph(2)->setPen(pen_z);
     p->replot();
+
+    p->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectPlottables);
 }
 
 void quat_init_plot(QCustomPlot *p)
@@ -151,82 +142,31 @@ void quat_plot(QCustomPlot *p)
     p->replot();
 }
 
-void quat_add_data(QCustomPlot *p, double t, double q[0])
+void quat_add_data(QCustomPlot *p, double time, double q[0])
 {
-    x.append(t);
+    t.append(time);
     q0.append(q[0]);
     q1.append(q[1]);
     q2.append(q[2]);
     q3.append(q[3]);
-    p->graph(0)->setData(x, q0);
-    p->graph(1)->setData(x, q1);
-    p->graph(2)->setData(x, q2);
-    p->graph(2)->setData(x, q3);
-
-    quat_plot(p);
+    //p->graph(0)->setData(time, q0);
+    //p->graph(1)->setData(time, q1);
+    //p->graph(2)->setDafalseta(time, q2);
+    //p->graph(2)->setData(time, q3);
+    //quat_plot(p);
 }
 
-void mag_plot(QCustomPlot *p)
+void MainWindow::append_simdata(double t, double lla[3], double b[3], double q[4])
 {
-    p->rescaleAxes();
-    p->replot();
-}
+    static bool is_first = true;
 
-void mag_add_data(QCustomPlot *p, double t, double b[3])
-{
-    x.append(t);
-    bx.append(b[0]);
-    by.append(b[1]);
-    bz.append(b[2]);
-    p->graph(0)->setData(x, bx);
-    p->graph(1)->setData(x, by);
-    p->graph(2)->setData(x, bz);
-
-    mag_plot(p);
-}
-
-
-void MainWindow::simulator()
-{
-    char line1[70];
-    char line2[70];
-    double stepmin = .01;
-    double startmin = 0;
-    double stopmin = 200;
-    strncpy(line1, parameters["orb_tle_1"].toString().toUtf8().constData(), 69); line1[69] = '\0';
-    strncpy(line2, parameters["orb_tle_2"].toString().toUtf8().constData(), 69); line2[69] = '\0';
-    tle.parseLines(line1, line2);
-
-
-    int steps = (stopmin - startmin) / stepmin;
-    double dcm[3][3], r_ecef[3], r[3], v[3], lla[3], b[3];
-
-    for (int i = 0; i < steps; i++)
+    if(is_first)
     {
-        double t = startmin + i * stepmin;
-
-        // Geodetic coordinates of satellite
-        tle.getRV(t, r, v);
-        frame_eci_to_ecef_dcm(tle.dt, dcm);
-        dcm_rotate(dcm, r, r_ecef);
-        frame_ecef_to_lla(r_ecef, lla);
-
-        // Compute magnetic field
-        // Compute magnetic field
-        if (!igrf(tle.dt, lla, IGRF_GEODETIC, b))
-        {
-            qDebug() << "IGRF date error!" << (int)tle.dt.year;
-        }
-        else
-        {
-            qDebug() << t << b[0] << b[1] << b[2];
-            mag_add_data(ui->widget_plot_mag, (double)i, b);
-        }
-
-        qDebug() << r[0] << "," << r[1] << "," << r[2];
-
-        gt_draw(lla[0], lla[1]);
+        is_first = false;
+        timer_plot_mag->start(33);
     }
+
+    gt_draw(lla[0], lla[1]);
 }
 
 void MainWindow::onParametersChanged()
@@ -258,7 +198,6 @@ void MainWindow::onParametersChanged()
 
     parameters["sim_stop_time"] = ui->lineEdit_sim_stop_time->text().toDouble();
     parameters["sim_step_time"] = ui->lineEdit_sim_step_time->text().toDouble();
-
 }
 
 void MainWindow::initializeParameters()
@@ -314,8 +253,7 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
-    try{
-    qDebug()<<"connecting to parameter changed";
+        qDebug()<<"connecting to parameter changed";
 
     ui->setupUi(this);
     qDebug()<<"initializing parameters";
@@ -331,7 +269,6 @@ MainWindow::MainWindow(QWidget *parent)
     // A container widget to link QQuickView to QWidget
     QWidget *container = QWidget::createWindowContainer(view, this);
     QVBoxLayout *layout = new QVBoxLayout(ui->quickContainer);
-    layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);
     ui->quickContainer->setLayout(layout);
     ui->quickContainer->layout()->addWidget(container);
@@ -339,18 +276,15 @@ MainWindow::MainWindow(QWidget *parent)
     gt_init();
     mag_init_plot(ui->widget_plot_mag);
 
-    qDebug() << "Done!!";
-
-    // simulator is run in parallel
-    // to update the data in realtime using simulator, run the update function for the visualization within the simulator
-    QtConcurrent::run([this](){
-        simulator();
-    });
-
-    } catch(QException e){
-        qDebug() << e.what();
-    }
-
+    timer_plot_mag = new QTimer(this);
+    connect(timer_plot_mag, &QTimer::timeout, this, [this]()
+            {
+                ui->widget_plot_mag->graph(0)->setData(t, bx);
+                ui->widget_plot_mag->graph(1)->setData(t, by);
+                ui->widget_plot_mag->graph(2)->setData(t, bz);
+                ui->widget_plot_mag->rescaleAxes();
+                ui->widget_plot_mag->replot();
+            });
 }
 
 MainWindow::~MainWindow()
@@ -362,6 +296,7 @@ MainWindow::~MainWindow()
 void MainWindow::on_pushButton_save_clicked()
 {
     qDebug() << "save clicked";
+    onParametersChanged();
     QJsonDocument json_doc = QJsonDocument::fromVariant(parameters);
     QFile json_file("../../default.json");
     json_file.open(QIODevice::WriteOnly | QIODevice::Text);
@@ -374,17 +309,25 @@ void MainWindow::on_pushButton_reload_clicked()
 {
     qDebug() << "parameters reinitialized";
     initializeParameters();
+    stop_flag = true;
 }
 
 
 void MainWindow::on_pushButton_start_simulation_clicked()
 {
+    qDebug() << "start simulation clicked";
     onParametersChanged();
-}
+    emit parameters_updated(parameters);
 
+    t.clear();
+    bx.clear();
+    by.clear();
+    bz.clear();
+    stop_flag = false;
+}
 
 void MainWindow::on_pushButton_set_simulation_param_clicked()
 {
+    stop_flag= true;
     onParametersChanged();
 }
-

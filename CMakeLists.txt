@@ -29,6 +29,7 @@ qt_add_executable(simdez
     SGP4.cpp SGP4.h
     TLE.cpp TLE.h
     qcustomplot.h qcustomplot.cpp
+    simulation.h simulation.cpp
 )
 
 target_link_libraries(simdez

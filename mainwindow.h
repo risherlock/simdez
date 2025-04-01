@@ -30,7 +30,14 @@ public:
     void initializeParameters();
     void addConnections();
 
+signals:
+    void parameters_updated(QMap<QString, QVariant> parameters);
+
+public slots:
+    void append_simdata(double t, double lla[3], double b[3], double q[4]);
+
 private:
+    QTimer *timer_plot_mag;
     Ui::MainWindow *ui;
     QJsonObject json_obj;
     QMap<QString, QVariant> parameters;
