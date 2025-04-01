@@ -4,7 +4,7 @@
 #include <QObject>
 #include "TLE.h"
 
-extern QVector<double> t, bx, by, bz, q0, q1, q2, q3;
+extern QVector<double> t, bx, by, bz, q0, q1, q2, q3, w0, w1, w2;
 extern bool stop_flag;
 
 class simulation : public QObject

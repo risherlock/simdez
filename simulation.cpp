@@ -11,8 +11,18 @@
 #include <QObject>
 #include <QThread>
 
-QVector<double> t, bx, by, bz, q0, q1, q2, q3;
+QVector<double> t, bx, by, bz, q0, q1, q2, q3, w0, w1, w2;
 bool stop_flag = false;
+
+int get_sign(double x)
+{
+    if(x<0)
+    {
+        return -1;
+    }
+
+    return 1;
+}
 
 simulation::simulation(QObject *parent)
     : QObject{parent}
@@ -29,6 +39,15 @@ simulation::simulation(QObject *parent)
     strncpy(line1, "1 25544U 98067A   25264.51782528 -.00002182  00000-0 -11606-4 0  2927", 69); line1[69] = '\0';
     strncpy(line2, "2 25544  51.6416 247.4627 0006703 130.5360 325.0288 15.72125391563537", 69); line2[69] = '\0';
     tle.parseLines(line1, line2);
+}
+
+// tau = -kp * sign(dq(4)) * dq(1 : 3) - kd * w;
+void control_law(const state_t err, const double kp, const double kd, double tau[3])
+{
+    int q0_sign = get_sign(err.q[0]);
+    tau[0] = -kp * q0_sign * err.q[1] - kd * err.w[0];
+    tau[1] = -kp * q0_sign * err.q[2] - kd * err.w[1];
+    tau[2] = -kp * q0_sign * err.q[3] - kd * err.w[2];
 }
 
 state_t get_err(const state_t xd, const state_t xf)
@@ -84,10 +103,11 @@ void simulation::run(void)
         frame_ecef_to_lla(r_ecef, lla);
         igrf(tle.dt, lla, IGRF_GEODETIC, b);
 
-        // Rotational dynamics
-        //state_t xerr = get_err(xd, x);
-
+        state_t xerr = get_err(xd, x);
         double tau[3] = {0.0, 0.0, 0.0};
+        control_law(xerr, kp, kd, tau);
+
+        // Rotational dynamics
         x = rk4(x, stepmin, I, tau);
 
         // Simulation output
@@ -99,6 +119,9 @@ void simulation::run(void)
         q1.append(x.q[1]);
         q2.append(x.q[2]);
         q3.append(x.q[3]);
+        w0.append(x.w[0]);
+        w1.append(x.w[1]);
+        w2.append(x.w[2]);
 
         qDebug() << x.q[0] << x.q[1] << x.q[2] << x.q[3];
 

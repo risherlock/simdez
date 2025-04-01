@@ -16,7 +16,7 @@
 #include <QQmlContext>
 #include <QQmlEngine>
 
-extern QVector<double> t, bx, by, bz, q0, q1, q2, q3;
+extern QVector<double> t, bx, by, bz, q0, q1, q2, q3, w0, w1, w2;
 extern bool stop_flag;
 
 void MainWindow::gt_init(void)
@@ -72,12 +72,45 @@ void mag_init_plot(QCustomPlot *p)
     p->yAxis->setLabelFont(QFont("Courier New", 12));
     p->xAxis->setLabelColor(Qt::blue);
     p->yAxis->setLabelColor(Qt::blue);
-    p->addGraph(); // Graph 0 -> x-axis
-    p->addGraph(); // Graph 1 -> y-axis
-    p->addGraph(); // Graph 2 -> z-axis
-    p->graph(0)->setName("x-axis");
-    p->graph(1)->setName("y-axis");
-    p->graph(2)->setName("z-axis");
+    p->addGraph(); // Graph 0 -> x
+    p->addGraph(); // Graph 1 -> y
+    p->addGraph(); // Graph 2 -> z
+    p->graph(0)->setName("x");
+    p->graph(1)->setName("y");
+    p->graph(2)->setName("z");
+    p->legend->setVisible(true);
+    p->graph(0)->setPen(pen_x);
+    p->graph(1)->setPen(pen_y);
+    p->graph(2)->setPen(pen_z);
+    p->replot();
+
+    p->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectPlottables);
+}
+
+
+void omega_init_plot(QCustomPlot *p)
+{
+    // Graph colour and width
+    QPen pen_x(QColor(0, 114, 189));
+    QPen pen_y(QColor(217, 83, 25));
+    QPen pen_z(QColor(237, 177, 32));
+    pen_x.setWidth(2);
+    pen_y.setWidth(2);
+    pen_z.setWidth(2);
+
+    // Labels on the magnetic field
+    p->xAxis->setLabel("Time [s]");
+    p->yAxis->setLabel("rad/s");
+    p->xAxis->setLabelFont(QFont("Courier New", 12));
+    p->yAxis->setLabelFont(QFont("Courier New", 12));
+    p->xAxis->setLabelColor(Qt::blue);
+    p->yAxis->setLabelColor(Qt::blue);
+    p->addGraph(); // Graph 0 -> x
+    p->addGraph(); // Graph 1 -> y
+    p->addGraph(); // Graph 2 -> z
+    p->graph(0)->setName("x");
+    p->graph(1)->setName("y");
+    p->graph(2)->setName("z");
     p->legend->setVisible(true);
     p->graph(0)->setPen(pen_x);
     p->graph(1)->setPen(pen_y);
@@ -202,6 +235,7 @@ MainWindow::MainWindow(QWidget *parent)
     gt_init();
     quat_init_plot(ui->widget_quat);
     mag_init_plot(ui->widget_plot_mag);
+    omega_init_plot(ui->widget_omega);
 
     timer_plot_mag = new QTimer(this);
     connect(timer_plot_mag, &QTimer::timeout, this, [this]()
@@ -225,9 +259,16 @@ MainWindow::MainWindow(QWidget *parent)
                 QQuaternion qq;
                 qq.setScalar(q0.last());
                 qq.setX(q1.last());
-                qq.setX(q2.last());
-                qq.setX(q3.last());
+                qq.setY(q2.last());
+                qq.setZ(q3.last());
                 sat_cad->set_q(qq);
+
+                // Plot angular rate
+                ui->widget_omega->graph(0)->setData(t, w0);
+                ui->widget_omega->graph(1)->setData(t, w1);
+                ui->widget_omega->graph(2)->setData(t, w2);
+                ui->widget_omega->rescaleAxes();
+                ui->widget_omega->replot();
             });
 }
 
