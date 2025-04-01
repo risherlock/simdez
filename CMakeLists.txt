@@ -30,6 +30,7 @@ qt_add_executable(simdez
     TLE.cpp TLE.h
     qcustomplot.h qcustomplot.cpp
     simulation.h simulation.cpp
+    rigid.h rigid.cpp
 )
 
 target_link_libraries(simdez

@@ -4,7 +4,7 @@
 #include <QObject>
 #include "TLE.h"
 
-extern QVector<double> t, bx, by, bz;
+extern QVector<double> t, bx, by, bz, q0, q1, q2, q3;
 extern bool stop_flag;
 
 class simulation : public QObject
@@ -23,6 +23,9 @@ private:
     double stopmin;
     int steps;
     int i;
+
+    double I[3][3];
+
     TLE tle;
 
 public slots:
