@@ -44,7 +44,7 @@
      <set>Qt::InputMethodHint::ImhMultiLine</set>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>2</number>
     </property>
     <widget class="QWidget" name="tab_3">
      <attribute name="title">
@@ -467,7 +467,7 @@
         <rect>
          <x>40</x>
          <y>51</y>
-         <width>242</width>
+         <width>252</width>
          <height>111</height>
         </rect>
        </property>
@@ -859,7 +859,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <rect>
          <x>10</x>
          <y>51</y>
-         <width>121</width>
+         <width>122</width>
          <height>111</height>
         </rect>
        </property>
@@ -1087,7 +1087,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <rect>
          <x>20</x>
          <y>51</y>
-         <width>175</width>
+         <width>182</width>
          <height>61</height>
         </rect>
        </property>
@@ -1270,8 +1270,8 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <widget class="QPushButton" name="pushButton">
       <property name="geometry">
        <rect>
-        <x>1040</x>
-        <y>330</y>
+        <x>880</x>
+        <y>500</y>
         <width>101</width>
         <height>41</height>
        </rect>
@@ -1283,10 +1283,10 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <widget class="QWidget" name="quickContainer" native="true">
       <property name="geometry">
        <rect>
-        <x>960</x>
+        <x>890</x>
         <y>60</y>
-        <width>241</width>
-        <height>221</height>
+        <width>321</width>
+        <height>401</height>
        </rect>
       </property>
       <property name="maximumSize">
@@ -1315,7 +1315,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <x>0</x>
      <y>0</y>
      <width>1280</width>
-     <height>23</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>

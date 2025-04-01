@@ -1,4 +1,3 @@
-#include "satellite.h"
 #include "simulation.h"
 
 #include "mainwindow.h"
@@ -14,6 +13,8 @@
 #include <QQuickView>
 #include <QVBoxLayout>
 #include <QJsonDocument>
+#include <QQmlContext>
+#include <QQmlEngine>
 
 extern QVector<double> t, bx, by, bz, q0, q1, q2, q3;
 extern bool stop_flag;
@@ -141,11 +142,12 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    // Register the class for QML to access variables
     qmlRegisterType<satellite>("Satellite", 1, 0, "Satellite");
-
-    // Load the QML file to QQuickView
+    sat_cad = new satellite();
     QQuickView *view = new QQuickView;
+    QQmlContext *context = view->engine()->rootContext();
+    context->setContextProperty("sat_cad", sat_cad);  // Expose to QML
+
     view->setSource(QUrl::fromLocalFile("../../main.qml"));
 
     // A container widget to link QQuickView to QWidget
@@ -218,6 +220,14 @@ MainWindow::MainWindow(QWidget *parent)
                 ui->widget_quat->graph(3)->setData(t, q3);
                 ui->widget_quat->rescaleAxes();
                 ui->widget_quat->replot();
+
+                // Update the orientation of CAD
+                QQuaternion qq;
+                qq.setScalar(q0.last());
+                qq.setX(q1.last());
+                qq.setX(q2.last());
+                qq.setX(q3.last());
+                sat_cad->set_q(qq);
             });
 }
 
