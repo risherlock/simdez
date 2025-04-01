@@ -1,7 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "../../../../qcustomplot.h"
+#include "satellite.h"
 
 #include <QMainWindow>
 #include <QJsonObject>
@@ -39,6 +39,7 @@ public slots:
     void append_simdata(double t, double lla[3], double b[3], double q[4]);
 
 private:
+    satellite *sat_cad;
     QTimer *timer_plot_mag;
     Ui::MainWindow *ui;
     QJsonObject json_obj;

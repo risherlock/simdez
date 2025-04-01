@@ -5,7 +5,7 @@
 #include <QVariant>
 #include "TLE.h"
 
-extern QVector<double> t, bx, by, bz;
+extern QVector<double> t, bx, by, bz, q0, q1, q2, q3, w0, w1, w2;
 extern bool stop_flag;
 
 class simulation : public QObject
@@ -25,6 +25,10 @@ private:
     double stopmin;
     int steps;
     int i;
+
+    double I[3][3] = {{10000, 0, 0}, {0, 9000, 0}, {0, 0, 12000}};
+;
+
     TLE tle;
 
 public slots:

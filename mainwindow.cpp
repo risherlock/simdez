@@ -1,4 +1,3 @@
-#include "satellite.h"
 #include "simulation.h"
 
 #include "mainwindow.h"
@@ -7,7 +6,6 @@
 
 #include <QUrl>
 #include <QPen>
-#include <QtConcurrent>
 #include <QFile>
 #include <QThread>
 #include <QWidget>
@@ -15,10 +13,11 @@
 #include <QQuickView>
 #include <QVBoxLayout>
 #include <QJsonDocument>
+#include <QQmlContext>
+#include <QQmlEngine>
 
-extern QVector<double> t, bx, by, bz;
+extern QVector<double> t, bx, by, bz, q0, q1, q2, q3, w0, w1, w2;
 extern bool stop_flag;
-QVector<double> q0, q1, q2, q3;
 
 QStringList parameterKeys = {
     "moi_xx",  "moi_xy",  "moi_xz",
@@ -87,12 +86,45 @@ void mag_init_plot(QCustomPlot *p)
     p->yAxis->setLabelFont(QFont("Courier New", 12));
     p->xAxis->setLabelColor(Qt::blue);
     p->yAxis->setLabelColor(Qt::blue);
-    p->addGraph(); // Graph 0 -> x-axis
-    p->addGraph(); // Graph 1 -> y-axis
-    p->addGraph(); // Graph 2 -> z-axis
-    p->graph(0)->setName("x-axis");
-    p->graph(1)->setName("y-axis");
-    p->graph(2)->setName("z-axis");
+    p->addGraph(); // Graph 0 -> x
+    p->addGraph(); // Graph 1 -> y
+    p->addGraph(); // Graph 2 -> z
+    p->graph(0)->setName("x");
+    p->graph(1)->setName("y");
+    p->graph(2)->setName("z");
+    p->legend->setVisible(true);
+    p->graph(0)->setPen(pen_x);
+    p->graph(1)->setPen(pen_y);
+    p->graph(2)->setPen(pen_z);
+    p->replot();
+
+    p->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectPlottables);
+}
+
+
+void omega_init_plot(QCustomPlot *p)
+{
+    // Graph colour and width
+    QPen pen_x(QColor(0, 114, 189));
+    QPen pen_y(QColor(217, 83, 25));
+    QPen pen_z(QColor(237, 177, 32));
+    pen_x.setWidth(2);
+    pen_y.setWidth(2);
+    pen_z.setWidth(2);
+
+    // Labels on the magnetic field
+    p->xAxis->setLabel("Time [s]");
+    p->yAxis->setLabel("rad/s");
+    p->xAxis->setLabelFont(QFont("Courier New", 12));
+    p->yAxis->setLabelFont(QFont("Courier New", 12));
+    p->xAxis->setLabelColor(Qt::blue);
+    p->yAxis->setLabelColor(Qt::blue);
+    p->addGraph(); // Graph 0 -> x
+    p->addGraph(); // Graph 1 -> y
+    p->addGraph(); // Graph 2 -> z
+    p->graph(0)->setName("x");
+    p->graph(1)->setName("y");
+    p->graph(2)->setName("z");
     p->legend->setVisible(true);
     p->graph(0)->setPen(pen_x);
     p->graph(1)->setPen(pen_y);
@@ -131,29 +163,11 @@ void quat_init_plot(QCustomPlot *p)
     p->legend->setVisible(true);
     p->graph(0)->setPen(pen_q0);
     p->graph(1)->setPen(pen_q1);
-    p->graph(1)->setPen(pen_q2);
-    p->graph(2)->setPen(pen_q3);
+    p->graph(2)->setPen(pen_q2);
+    p->graph(3)->setPen(pen_q3);
     p->replot();
-}
 
-void quat_plot(QCustomPlot *p)
-{
-    p->rescaleAxes();
-    p->replot();
-}
-
-void quat_add_data(QCustomPlot *p, double time, double q[0])
-{
-    t.append(time);
-    q0.append(q[0]);
-    q1.append(q[1]);
-    q2.append(q[2]);
-    q3.append(q[3]);
-    //p->graph(0)->setData(time, q0);
-    //p->graph(1)->setData(time, q1);
-    //p->graph(2)->setDafalseta(time, q2);
-    //p->graph(2)->setData(time, q3);
-    //quat_plot(p);
+    p->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectPlottables);
 }
 
 void MainWindow::append_simdata(double t, double lla[3], double b[3], double q[4])
@@ -265,11 +279,12 @@ MainWindow::MainWindow(QWidget *parent)
     qDebug()<<"initializing parameters";
     initializeParameters();
 
-    // Register the class for QML to access variables
     qmlRegisterType<satellite>("Satellite", 1, 0, "Satellite");
-
-    // Load the QML file to QQuickView
+    sat_cad = new satellite();
     QQuickView *view = new QQuickView;
+    QQmlContext *context = view->engine()->rootContext();
+    context->setContextProperty("sat_cad", sat_cad);  // Expose to QML
+
     view->setSource(QUrl::fromLocalFile("../../main.qml"));
 
     // A container widget to link QQuickView to QWidget
@@ -280,17 +295,43 @@ MainWindow::MainWindow(QWidget *parent)
     ui->quickContainer->layout()->addWidget(container);
 
     gt_init();
+    quat_init_plot(ui->widget_quat);
     mag_init_plot(ui->widget_plot_mag);
+    omega_init_plot(ui->widget_omega);
 
     timer_plot_mag = new QTimer(this);
     connect(timer_plot_mag, &QTimer::timeout, this, [this]()
             {
+                // Plot magnetic field
                 ui->widget_plot_mag->graph(0)->setData(t, bx);
                 ui->widget_plot_mag->graph(1)->setData(t, by);
                 ui->widget_plot_mag->graph(2)->setData(t, bz);
                 ui->widget_plot_mag->rescaleAxes();
                 ui->widget_plot_mag->replot();
-            });    
+
+                // Plot quaternion
+                ui->widget_quat->graph(0)->setData(t, q0);
+                ui->widget_quat->graph(1)->setData(t, q1);
+                ui->widget_quat->graph(2)->setData(t, q2);
+                ui->widget_quat->graph(3)->setData(t, q3);
+                ui->widget_quat->rescaleAxes();
+                ui->widget_quat->replot();
+
+                // Update the orientation of CAD
+                QQuaternion qq;
+                qq.setScalar(q0.last());
+                qq.setX(q1.last());
+                qq.setY(q2.last());
+                qq.setZ(q3.last());
+                sat_cad->set_q(qq);
+
+                // Plot angular rate
+                ui->widget_omega->graph(0)->setData(t, w0);
+                ui->widget_omega->graph(1)->setData(t, w1);
+                ui->widget_omega->graph(2)->setData(t, w2);
+                ui->widget_omega->rescaleAxes();
+                ui->widget_omega->replot();
+            });
 }
 
 MainWindow::~MainWindow()
@@ -301,6 +342,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_pushButton_save_clicked()
 {
+    stop_flag = true;
     qDebug() << "save clicked";
     onParametersChanged();
     QJsonDocument json_doc = QJsonDocument::fromVariant(parameters);
@@ -313,14 +355,15 @@ void MainWindow::on_pushButton_save_clicked()
 
 void MainWindow::on_pushButton_reload_clicked()
 {
+    stop_flag = true;
     qDebug() << "parameters reinitialized";
     initializeParameters();
-    stop_flag = true;
 }
 
 
 void MainWindow::on_pushButton_start_simulation_clicked()
 {
+    stop_flag = true;
     qDebug() << "start simulation clicked";
     onParametersChanged();
     emit parameters_updated(parameters);
@@ -329,12 +372,20 @@ void MainWindow::on_pushButton_start_simulation_clicked()
     bx.clear();
     by.clear();
     bz.clear();
+    q0.clear();
+    q1.clear();
+    q2.clear();
+    q3.clear();
+    w0.clear();
+    w1.clear();
+    w2.clear();
+
     stop_flag = false;
 }
 
 void MainWindow::on_pushButton_set_simulation_param_clicked()
 {
-    stop_flag= false;
+    stop_flag= true;
     onParametersChanged();
     emit parameters_updated(parameters);
 

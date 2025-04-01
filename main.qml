@@ -9,7 +9,7 @@ Item
 
     Satellite
     {
-        id: tamariw
+        id: cad_model
     }
 
     View3D
@@ -36,7 +36,7 @@ Item
             Sat {}
             scale: Qt.vector3d(50, 50, 50)
             position: Qt.vector3d(0, 0, 0)
-            rotation: tamariw.get_q
+            rotation: sat_cad.get_q
         }
     }
 }
