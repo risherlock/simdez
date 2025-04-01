@@ -1,11 +1,11 @@
 #include "simulation.h"
 
 #include "dcm.h"
-#include "SGP4.h"
 #include "igrf.h"
 #include "time.h"
 #include "frame.h"
 #include "rigid.h"
+#include "quat.h"
 
 #include <QDebug>
 #include <QObject>
@@ -23,15 +23,24 @@ simulation::simulation(QObject *parent)
     stopmin = 600;
     steps = (stopmin - startmin) / stepmin;
 
-    // Moment of Inertia
-    double I[3][3] = {{10000, 0, 0}, {0, 9000, 0}, {0, 0, 12000}};
-
     // Parse TLE
     char line1[70];
     char line2[70];
     strncpy(line1, "1 25544U 98067A   25264.51782528 -.00002182  00000-0 -11606-4 0  2927", 69); line1[69] = '\0';
     strncpy(line2, "2 25544  51.6416 247.4627 0006703 130.5360 325.0288 15.72125391563537", 69); line2[69] = '\0';
     tle.parseLines(line1, line2);
+}
+
+state_t get_err(const state_t xd, const state_t xf)
+{
+    state_t xerr;
+
+    quat_err(xd.q, xf.q, xerr.q);
+    xerr.w[0] = xf.w[0];
+    xerr.w[1] = xf.w[1];
+    xerr.w[2] = xf.w[2];
+
+    return xerr;
 }
 
 void simulation::run(void)
@@ -60,12 +69,13 @@ void simulation::run(void)
     xd.w[1] = 0.0f;
     xd.w[2] = 0.0f;
 
+    state_t x = x0;
+
     while(!stop_flag)
     {
         double dcm[3][3], r_ecef[3], r[3], v[3], lla[3], b[3];
         double q[4] = {1, 0, 0, 0};
         double time = startmin + i * stepmin;
-        state_t x;
 
         // Orbit propagation and IGRF
         tle.getRV(time, r, v);
@@ -75,15 +85,22 @@ void simulation::run(void)
         igrf(tle.dt, lla, IGRF_GEODETIC, b);
 
         // Rotational dynamics
-        state_t xerr = get_err(xd, x)
+        //state_t xerr = get_err(xd, x);
+
+        double tau[3] = {0.0, 0.0, 0.0};
+        x = rk4(x, stepmin, I, tau);
 
         // Simulation output
         t.append(time);
         bx.append(b[0]);
         by.append(b[1]);
         bz.append(b[2]);
+        q0.append(x.q[0]);
+        q1.append(x.q[1]);
+        q2.append(x.q[2]);
+        q3.append(x.q[3]);
 
-        qDebug() << b[0];
+        qDebug() << x.q[0] << x.q[1] << x.q[2] << x.q[3];
 
         i++;
         emit data_generated(time, lla, b, q);

@@ -1,7 +1,7 @@
 #ifndef _SIMDEZVOUS_RIGID_H_
 #define _SIMDEZVOUS_RIGID_H_
 
-#include <Eigen>
+#include "Eigen/Eigen"
 
 typedef struct
 {

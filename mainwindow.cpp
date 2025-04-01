@@ -15,9 +15,8 @@
 #include <QVBoxLayout>
 #include <QJsonDocument>
 
-extern QVector<double> t, bx, by, bz;
+extern QVector<double> t, bx, by, bz, q0, q1, q2, q3;
 extern bool stop_flag;
-QVector<double> q0, q1, q2, q3;
 
 void MainWindow::gt_init(void)
 {
@@ -116,29 +115,11 @@ void quat_init_plot(QCustomPlot *p)
     p->legend->setVisible(true);
     p->graph(0)->setPen(pen_q0);
     p->graph(1)->setPen(pen_q1);
-    p->graph(1)->setPen(pen_q2);
-    p->graph(2)->setPen(pen_q3);
+    p->graph(2)->setPen(pen_q2);
+    p->graph(3)->setPen(pen_q3);
     p->replot();
-}
 
-void quat_plot(QCustomPlot *p)
-{
-    p->rescaleAxes();
-    p->replot();
-}
-
-void quat_add_data(QCustomPlot *p, double time, double q[0])
-{
-    t.append(time);
-    q0.append(q[0]);
-    q1.append(q[1]);
-    q2.append(q[2]);
-    q3.append(q[3]);
-    //p->graph(0)->setData(time, q0);
-    //p->graph(1)->setData(time, q1);
-    //p->graph(2)->setDafalseta(time, q2);
-    //p->graph(2)->setData(time, q3);
-    //quat_plot(p);
+    p->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectPlottables);
 }
 
 void MainWindow::append_simdata(double t, double lla[3], double b[3], double q[4])
@@ -217,16 +198,26 @@ MainWindow::MainWindow(QWidget *parent)
     ui->lineEdit_sim_step_time->setText(QString::number(json_obj["sim_step_time"].toDouble()));
 
     gt_init();
+    quat_init_plot(ui->widget_quat);
     mag_init_plot(ui->widget_plot_mag);
 
     timer_plot_mag = new QTimer(this);
     connect(timer_plot_mag, &QTimer::timeout, this, [this]()
             {
+                // Plot magnetic field
                 ui->widget_plot_mag->graph(0)->setData(t, bx);
                 ui->widget_plot_mag->graph(1)->setData(t, by);
                 ui->widget_plot_mag->graph(2)->setData(t, bz);
                 ui->widget_plot_mag->rescaleAxes();
                 ui->widget_plot_mag->replot();
+
+                // Plot quaternion
+                ui->widget_quat->graph(0)->setData(t, q0);
+                ui->widget_quat->graph(1)->setData(t, q1);
+                ui->widget_quat->graph(2)->setData(t, q2);
+                ui->widget_quat->graph(3)->setData(t, q3);
+                ui->widget_quat->rescaleAxes();
+                ui->widget_quat->replot();
             });
 }
 

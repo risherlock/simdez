@@ -24,7 +24,8 @@ private:
     int steps;
     int i;
 
-    double I[3][3];
+    double I[3][3] = {{10000, 0, 0}, {0, 9000, 0}, {0, 0, 12000}};
+;
 
     TLE tle;
 
