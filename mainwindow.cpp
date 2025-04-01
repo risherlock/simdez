@@ -21,18 +21,18 @@ extern bool stop_flag;
 QVector<double> q0, q1, q2, q3;
 
 QStringList parameterKeys = {
-                            "moi_xx",  "moi_xy",  "moi_xz",
-                            "moi_yx",  "moi_yy",  "moi_yz",
-                            "moi_zx",  "moi_zy",  "moi_zz",
-                             "em_turns",
-                             "em_core_length",
-                             "em_core_area",
-                             "em_max_current",
-                            "orb_tle_1",  "orb_tle_2",  "orb_is_tle",
-                            "orb_inclination",  "orb_eccentricity",  "orb_semi_major",  "orb_semi_minor",
-                            "att_y0",  "att_p0",  "att_r0",  "att_w10",  "att_w20",  "att_w30",
-                            "sim_stop_time",  "sim_step_time"
-                            };
+    "moi_xx",  "moi_xy",  "moi_xz",
+    "moi_yx",  "moi_yy",  "moi_yz",
+    "moi_zx",  "moi_zy",  "moi_zz",
+    "em_turns",
+    "em_core_length",
+    "em_core_area",
+    "em_max_current",
+    "orb_tle_1",  "orb_tle_2",  "orb_is_tle",
+    "orb_inclination",  "orb_eccentricity",  "orb_semi_major",  "orb_semi_minor",
+    "att_y0",  "att_p0",  "att_r0",  "att_w10",  "att_w20",  "att_w30",
+    "sim_stop_time",  "sim_step_time"
+};
 
 void MainWindow::gt_init(void)
 {
@@ -158,6 +158,7 @@ void quat_add_data(QCustomPlot *p, double time, double q[0])
 
 void MainWindow::append_simdata(double t, double lla[3], double b[3], double q[4])
 {
+    qDebug() << "appending sim_data";
     static bool is_first = true;
 
     if(is_first)
@@ -167,6 +168,11 @@ void MainWindow::append_simdata(double t, double lla[3], double b[3], double q[4
     }
 
     gt_draw(lla[0], lla[1]);
+}
+
+QMap<QString, QVariant> MainWindow::getParameters() const
+{
+    return parameters;
 }
 
 void MainWindow::onParametersChanged()
@@ -253,7 +259,7 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
-        qDebug()<<"connecting to parameter changed";
+    qDebug()<<"connecting to parameter changed";
 
     ui->setupUi(this);
     qDebug()<<"initializing parameters";
@@ -284,7 +290,7 @@ MainWindow::MainWindow(QWidget *parent)
                 ui->widget_plot_mag->graph(2)->setData(t, bz);
                 ui->widget_plot_mag->rescaleAxes();
                 ui->widget_plot_mag->replot();
-            });
+            });    
 }
 
 MainWindow::~MainWindow()
@@ -328,6 +334,8 @@ void MainWindow::on_pushButton_start_simulation_clicked()
 
 void MainWindow::on_pushButton_set_simulation_param_clicked()
 {
-    stop_flag= true;
+    stop_flag= false;
     onParametersChanged();
+    emit parameters_updated(parameters);
+
 }

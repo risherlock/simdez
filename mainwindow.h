@@ -30,6 +30,8 @@ public:
     void initializeParameters();
     void addConnections();
 
+    QMap<QString, QVariant> getParameters() const;
+
 signals:
     void parameters_updated(QMap<QString, QVariant> parameters);
 

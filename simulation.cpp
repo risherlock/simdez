@@ -13,21 +13,25 @@
 QVector<double> t, bx, by, bz;
 bool stop_flag = false;
 
-simulation::simulation(QObject *parent)
+simulation::simulation(QObject *parent, const QMap<QString, QVariant> &parameters)
     : QObject{parent}
 {
+    updateParameters(parameters);
     qDebug() << "Simulation has been initialized";
 }
 
 void simulation::updateParameters(const QMap<QString, QVariant> &parameters)
 {
+    qDebug() << "updating simulation parameters";
+    qDebug() << stepmin << startmin << stopmin << steps;
+
     // Simulation params
     stepmin = parameters["sim_step_time"].toDouble();
     startmin = 0;
     stopmin = parameters["sim_stop_time"].toDouble();
     steps = (stopmin - startmin) / stepmin;
+    i =0;
 
-    qDebug() << "updating simulation parameters" << stepmin << startmin << stopmin << steps;
 
     // Parse TLE
     char line1[70];
@@ -40,35 +44,39 @@ void simulation::updateParameters(const QMap<QString, QVariant> &parameters)
 void simulation::run(void)
 {
     qDebug() << "I am within simulation run" <<stop_flag;
-    while(!stop_flag)
+    while(1)
     {
-        qDebug() << "working on a simulation";
-        double dcm[3][3], r_ecef[3], r[3], v[3], lla[3], b[3];
-        double q[4] = {1, 0, 0, 0};
-        double time = startmin + i * stepmin;
-
-        // Orbit propagation and IGRF
-        tle.getRV(time, r, v);
-        frame_eci_to_ecef_dcm(tle.dt, dcm);
-        dcm_rotate(dcm, r, r_ecef);
-        frame_ecef_to_lla(r_ecef, lla);
-        igrf(tle.dt, lla, IGRF_GEODETIC, b);
-
-        // Simulation output
-        t.append(time);
-        bx.append(b[0]);
-        by.append(b[1]);
-        bz.append(b[2]);
-
-        qDebug() << b[0];
-
-        i++;
-        emit data_generated(time, lla, b, q);
-        QThread::msleep(20);
-
-        if(i >= steps)
+        if(i >= steps && !stop_flag)
         {
+            qDebug() << i;
             stop_flag = true;
+        }
+        
+        if(!stop_flag){
+            // qDebug() << "working on a simulation";
+            double dcm[3][3], r_ecef[3], r[3], v[3], lla[3], b[3];
+            double q[4] = {1, 0, 0, 0};
+            double time = startmin + i * stepmin;
+
+            // Orbit propagation and IGRF
+            tle.getRV(time, r, v);
+            frame_eci_to_ecef_dcm(tle.dt, dcm);
+            dcm_rotate(dcm, r, r_ecef);
+            frame_ecef_to_lla(r_ecef, lla);
+            igrf(tle.dt, lla, IGRF_GEODETIC, b);
+
+            // Simulation output
+            t.append(time);
+            bx.append(b[0]);
+            by.append(b[1]);
+            bz.append(b[2]);
+
+            qDebug() << i << steps;
+
+            i++;
+
+            emit data_generated(time, lla, b, q);
+            QThread::msleep(20);
         }
     }
 }

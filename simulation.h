@@ -17,6 +17,7 @@ signals:
 
 public:
     explicit simulation(QObject *parent = nullptr);
+    explicit simulation(QObject *parent = nullptr, const QMap<QString, QVariant> &parameters = QMap<QString, QVariant>());
 
 private:
     double stepmin;
