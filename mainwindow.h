@@ -2,14 +2,17 @@
 #define MAINWINDOW_H
 
 #include "satellite.h"
+#include "simulation.h"
 
 #include <QMainWindow>
 #include <QJsonObject>
 #include <QPainter>
+#include <QThread>
 
 QT_BEGIN_NAMESPACE
-namespace Ui {
-class MainWindow;
+namespace Ui
+{
+    class MainWindow;
 }
 QT_END_NAMESPACE
 
@@ -44,8 +47,11 @@ private:
     Ui::MainWindow *ui;
     QJsonObject json_obj;
     QMap<QString, QVariant> parameters;
+    QThread *simulation_thread = new QThread();
+    simulation *simulation_worker = new simulation();
 
     bool validateJSONKeys();
+    void startSimulation();
 
 private slots:
     void onParametersChanged();

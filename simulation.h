@@ -6,7 +6,6 @@
 #include "TLE.h"
 
 extern QVector<double> t, bx, by, bz, q0, q1, q2, q3, w0, w1, w2;
-extern bool stop_flag;
 
 class simulation : public QObject
 {
@@ -17,7 +16,7 @@ signals:
 
 public:
     explicit simulation(QObject *parent = nullptr);
-    explicit simulation(QObject *parent = nullptr, const QMap<QString, QVariant> &parameters = QMap<QString, QVariant>());
+    void updateParameters(QMap<QString, QVariant> parameters);
 
 private:
     double stepmin;
@@ -32,7 +31,6 @@ private:
     TLE tle;
 
 public slots:
-    void updateParameters(const QMap<QString, QVariant> &parameters);
     void run(void);
 };
 

@@ -17,7 +17,6 @@
 #include <QQmlEngine>
 
 extern QVector<double> t, bx, by, bz, q0, q1, q2, q3, w0, w1, w2;
-extern bool stop_flag;
 
 QStringList parameterKeys = {
     "moi_xx",  "moi_xy",  "moi_xz",
@@ -67,6 +66,7 @@ void MainWindow::gt_draw(const double la, const double lo)
     int radius = 5;
     gt_painter.drawEllipse(QPoint(x_axis, y_axis), radius, radius);
     ui->label_map->setPixmap(gt_pixmap);
+    qDebug() << "drew"<< la << lo << map_width << map_height;
 }
 
 void mag_init_plot(QCustomPlot *p)
@@ -212,12 +212,13 @@ void MainWindow::onParametersChanged()
     parameters["att_w10"] = ui->lineEdit_att_w10->text().toDouble();
     parameters["att_w20"] = ui->lineEdit_att_w20->text().toDouble();
     parameters["att_w30"] = ui->lineEdit_att_w30->text().toDouble();
+    
+    parameters["sim_step_time"] = ui->lineEdit_sim_step_time->text().toDouble();
+    parameters["sim_stop_time"] = ui->lineEdit_sim_stop_time->text().toDouble();
 
     parameters["orb_tle_1"] = ui->textEdit_orb_tle_1->toPlainText();
-    parameters["orb_tle_2"] = ui->textEdit_orb_tle_1->toPlainText();
+    parameters["orb_tle_2"] = ui->textEdit_orb_tle_2->toPlainText();
 
-    parameters["sim_stop_time"] = ui->lineEdit_sim_stop_time->text().toDouble();
-    parameters["sim_step_time"] = ui->lineEdit_sim_step_time->text().toDouble();
 }
 
 void MainWindow::initializeParameters()
@@ -339,10 +340,8 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-
 void MainWindow::on_pushButton_save_clicked()
 {
-    stop_flag = true;
     qDebug() << "save clicked";
     onParametersChanged();
     QJsonDocument json_doc = QJsonDocument::fromVariant(parameters);
@@ -355,7 +354,6 @@ void MainWindow::on_pushButton_save_clicked()
 
 void MainWindow::on_pushButton_reload_clicked()
 {
-    stop_flag = true;
     qDebug() << "parameters reinitialized";
     initializeParameters();
 }
@@ -363,11 +361,8 @@ void MainWindow::on_pushButton_reload_clicked()
 
 void MainWindow::on_pushButton_start_simulation_clicked()
 {
-    stop_flag = true;
-    qDebug() << "start simulation clicked";
+    qDebug() << "start simulation clicked and parameter update emited";
     onParametersChanged();
-    emit parameters_updated(parameters);
-
     t.clear();
     bx.clear();
     by.clear();
@@ -380,13 +375,40 @@ void MainWindow::on_pushButton_start_simulation_clicked()
     w1.clear();
     w2.clear();
 
-    stop_flag = false;
+    startSimulation();
+}
+
+void MainWindow::startSimulation()
+{
+    if (simulation_thread->isRunning())
+    {
+        qDebug() << "Stopping simulation thread...";
+        simulation_thread->requestInterruption();
+        simulation_thread->quit();
+        simulation_thread->wait();
+    }
+    
+    delete simulation_thread;
+    delete simulation_worker;
+
+    simulation_thread = new QThread();
+    simulation_worker = new simulation();
+    simulation_worker->moveToThread(simulation_thread);
+    simulation_worker->updateParameters(parameters);
+
+    QObject::connect(simulation_thread, &QThread::started, simulation_worker, &simulation::run);
+    QObject::connect(this, &MainWindow::parameters_updated, simulation_worker, &simulation::updateParameters, Qt::QueuedConnection);
+    QObject::connect(simulation_worker, &simulation::data_generated, this, &MainWindow::append_simdata, Qt::QueuedConnection);
+
+    simulation_thread->start();
 }
 
 void MainWindow::on_pushButton_set_simulation_param_clicked()
 {
-    stop_flag= true;
     onParametersChanged();
-    emit parameters_updated(parameters);
+    qDebug() << "simulation parameters"<< parameters["sim_step_time"].toDouble() << parameters["sim_stop_time"].toDouble();
+    // timer_plot_mag->stop();
+
+    qDebug() << "set sim" <<t;
 
 }
