@@ -59,6 +59,7 @@ private slots:
     void on_pushButton_reload_clicked();
     void on_pushButton_start_simulation_clicked();
     void on_pushButton_set_simulation_param_clicked();
+    void on_pushButton_stop_simulation_clicked();
 };
 
 #endif // MAINWINDOW_H

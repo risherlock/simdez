@@ -412,3 +412,18 @@ void MainWindow::on_pushButton_set_simulation_param_clicked()
     qDebug() << "set sim" <<t;
 
 }
+
+void MainWindow::on_pushButton_stop_simulation_clicked()
+{
+    if (simulation_thread->isRunning())
+    {
+        qDebug() << "Stopping simulation thread...";
+        simulation_thread->requestInterruption();
+        simulation_thread->quit();
+        simulation_thread->wait();
+    } else {
+        qDebug() << "No simulation in progress";
+    }
+
+}
+
